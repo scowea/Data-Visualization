@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<!-- 
+Author: Scott M Weaver
+Date: 2014-02-01	
+-->
 <html>
  	<head>
   		<title>Data Visualization</title>
@@ -20,6 +24,7 @@
 
 
 		<script>
+//#########################################################################		
 count = 0;
 count_per_year_arr = new Array();
 
@@ -43,7 +48,6 @@ apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&forma
     
 $(document).ready(function(){
     
-    
     // get the data from flickr
     // see how many pages of photos we have...
     $.getJSON(apiurl,function(json){
@@ -55,19 +59,10 @@ $(document).ready(function(){
 	    total_flickr_photos = json.photos.total;
 	    
 	    // zero out the year/month counters
-	    
 	    for (this_year = 2006; this_year <= 2014; this_year++)
 	    {
 	    	count_per_year_arr[this_year] = 0;
-	    		    	
-	    	//for(this_month = 1; this_month <= 12; this_month++)
-	    	//{
-	    	//		
-	    	//}
 	    }
-	     
-	    
-	    
 	    
 	    // roll through the pages of photos...
 	    for (var this_page=1;this_page<=json.photos.pages;this_page++)
@@ -131,10 +126,6 @@ $(document).ready(function(){
 	    	
 	    	year_arr_index++;
 	    	
-	    	//for(this_month = 1; this_month <= 12; this_month++)
-	    	//{
-	    	//		
-	    	//}
 	    }
 	    
 	    //.................................................
@@ -168,6 +159,7 @@ $(document).ready(function(){
 
 	}); //
 }); // end $(document).ready(function(){
+//#########################################################################
 		</script>
   	</head>
 

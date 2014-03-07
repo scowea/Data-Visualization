@@ -1,25 +1,28 @@
 <!DOCTYPE html>
+<!-- 
+Author: Scott M Weaver
+Date: 2014-02-01	
+-->
 <html>
-  <head>
-  	
-  	<meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <link rel="shortcut icon" href="docs-assets/favicon.ico">
-     <title>Data Visualization</title>
-    
-    <link rel="stylesheet" href="css/layout.css">
-    <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.css" rel="stylesheet">
+  	<head>
+  		<title>Data Visualization</title>
+  		<meta charset="utf-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<meta name="description" content="">
+    	<meta name="author" content="">
+    	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+    	<link rel="shortcut icon" href="docs-assets/favicon.ico">
+    	<link rel="stylesheet" href="css/layout.css">
+    	<!-- Bootstrap core CSS -->
+    	<link href="css/bootstrap.css" rel="stylesheet">
 
- <script src="js/jquery.min.js"></script>
-<script src="highcharts/js/highcharts.js"></script>
+ 		<script src="js/jquery.min.js"></script>
+		<script src="highcharts/js/highcharts.js"></script>
 
 <script>
+//#######################################################################################
 count = 0;
 percentage_loaded = 0;
 num_photos = 0;
@@ -32,14 +35,13 @@ apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&forma
 //Important Dates:
 //   Obama elected: 2008-11-4 (november 4, 2008)
  
-    
 $(document).ready(function(){
     
     // get the data from flickr	  
     // see how many pages of photos we have...
     $.getJSON(apiurl,function(json){
     	
-    	//$("#flickr_data").html('<p>Number of Photo Pages:'+json.photos.pages+'</p>');
+    	// show status messages...
     	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
     	$("#loading_progressbar").html(percentage_loaded); 
 	    
@@ -51,25 +53,29 @@ $(document).ready(function(){
 	    	// get data for this page of photos
 	    	$.getJSON(apiurl+'&page='+this_page,function(json){
 	    		
-	    		//$("#flickr_data").html('<p>Number of Photo Pages:'+json.photos.pages+'</p>');
-	    		
+	    		// get data for each photo
 	    		$.each(json.photos.photo,function(i,this_photo){
 					count++;
 					$("#flickr_data").append(count + ': '+ this_photo.datetaken+';'+this_photo.longitude+','+this_photo.latitude+'|');
-					$("#flickr_count").html('<p>Loading Photos From Flickr.com that contain location data, and that are tagged with "Hope" and "Obama": '+count+'</p>');
+					$("#flickr_count").html('<p>Loading Photos From Flickr.com that contain Geo-Location data, and that are tagged with "Hope" and "Obama": '+count+'</p>');
+					$("#status_message").html('<h2>One Moment Please...</h2>');
 					$("#loading_progressbar").html(count);
 					
+					// calculate the progress bar percentage
+					var progress_bar = document.getElementById('progress-bar');
 					percentage_loaded = (count * 100)/total_flickr_photos;
-					
-					var divArray = document.getElementById('progress-bar');
-					divArray.style.width = percentage_loaded+'%';
+					progress_bar.style.width = percentage_loaded+'%';
 					
 					// show the ending total count
 	    			if (count >= (total_flickr_photos-250))
 	    			{
-						$("#flickr_count").html('<p>Photos Loaded: '+total_flickr_photos+'</p>');
-						divArray.style.width = '100%';
+	    				$("#status_message").html(''); // clear the status message
+						$("#flickr_count").html('<p>Photos Loaded: <b>'+total_flickr_photos+'</b></p>');
+						progress_bar.style.width = '100%';
 
+						// we are done so hide the progress bar
+						var progress_bar_container = document.getElementById('progress');
+						progress_bar_container.style.visibility="hidden";
 					}	  					
 				}); // end $.each(json.photos.photo,function(i,myresult){
 								
@@ -80,73 +86,70 @@ $(document).ready(function(){
     }); // end $.getJSON(apiurl,function(json){
 	
 }); // end $(document).ready(function(){
-    </script>
-  </head>
+//#########################################################################
+</script>
 
-  <body class="claro">
-  	
-  	 
+	</head>
 
+  	<body class="claro">
   	
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+    	<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      		<div class="container">
+        		<div class="navbar-header">
+          			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            			<span class="sr-only">Toggle navigation</span>
+            			<span class="icon-bar"></span>
+            			<span class="icon-bar"></span>
+            			<span class="icon-bar"></span>
+          			</button>
           
-          <a class="navbar-brand" href="index.html">Data Visualization</a>
-        </div>
-        <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="about.html">About</a></li>
-            
-           
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
+          			<a class="navbar-brand" href="index.html">Data Visualization</a>
+        		</div><!--/.navbar-header -->
+        		
+        		<div class="collapse navbar-collapse">
+          			<ul class="nav navbar-nav">
+          			<li><a href="index.html">Home</a></li>
+          			<li><a href="about.html">About</a></li>
+          			</ul>
+        		</div><!--/.nav-collapse -->
+      		</div><!--/.container -->
+    	</div><!--/.navbar -->
+  	
+		<div class="container">
+      		<br>
+			<p>
+				<a class="btn btn-success btn-lg" role="button" href="index.html" >&laquo; Back to see more</a>
+				<div id="status_message"></div>
+			</p>
       
-    </div>
-  	
-  	
-  	
-  	
-	<div class="container">
-      	<!-- Example row of columns -->
-      	<br>
-      
-		<p><a class="btn btn-success btn-lg" role="button" href="index.html" >&laquo; Back to see more</a></p>
-      
-		<div class="progress">
-			<div id="progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div> 
-		</div>
-
-       	<div id="flickr_count"></div>
+			<div id="progress" class="progress">
+				<div id="progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div> 
+			</div>
+       		<div id="flickr_count"></div>
      
-   		<div class="well">
-   			<p>
-   				<div id="map1" style="height:100%; width:100%;"></div>
-   				Date Taken, Longitude, Latitude 
-				<div id="flickr_data"></div>
-   			</p>
+   			<div class="well">
+   				<p>
+   					<div id="map1" style="height:100%; width:100%;"></div>
+   					
+   					<sub>
+   					Data Format:<br>
+   					Count, Date Taken, Longitude, Latitude|
+   					</sub> 
+					<div id="flickr_data"></div>
+   				</p>
+   			</div><!--/.well -->
 
-   		</div>
+      		<hr>
 
-      <hr>
-
-      <footer>
-        <p>&copy; SweetCodeSolutions 2014</p>
-      </footer>
-    </div> <!-- /container -->
+      		<footer>
+        		<p>&copy; SweetCodeSolutions 2014</p>
+      		</footer>
+    	</div> <!-- /container -->
   	
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
+    	<!-- Bootstrap core JavaScript
+    	================================================== -->
+    	<!-- Placed at the end of the document so the pages load faster -->
   
-    <script src="js/bootstrap.min.js"></script>
-  </body>
+    	<script src="js/bootstrap.min.js"></script>
+	</body>
 </html>

@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<!-- 
+Author: Scott M Weaver
+Date: 2014-02-01	
+-->
 <html>
  	<head>
   		<title>Data Visualization</title>
@@ -18,19 +22,28 @@
  		<script src="js/jquery.min.js"></script>
 		<script src="highcharts/js/highcharts.js"></script>
 
-
 		<script>
+//#####################################################################################
 count = 0;
-count_per_year_arr = new Array();
 
+count_per_year_arr = new Array();
 year_labels_arr = new Array();
 year_data_arr = new Array();
 year_arr_index = 0;
+
+   
+count_per_month_and_year_arr = new Array();
+ 
+
+month_labels_arr = new Array();
+month_data_arr = new Array();
+month_arr_index = 0;
 
 percentage_loaded = 0;
 num_photos = 0;
 num_photo_pages = 0;
 arr_photos = new Array();
+
 apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken";
 //Key:dd4eb2f7ebff37400f01aae57493f41e
 //Secret:7a6541283f6e96bf
@@ -40,7 +53,10 @@ apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&forma
 
 // &has_geo=1 
 // &sort=date-taken-asc
+ 
+     
     
+//..........................................................................    
 $(document).ready(function(){
     
     
@@ -48,27 +64,30 @@ $(document).ready(function(){
     // see how many pages of photos we have...
     $.getJSON(apiurl,function(json){
     	
+    	// show status messages...
     	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
     	$("#loading_progressbar").html(percentage_loaded); 
 	    
 	    // total of all photos across all pages
 	    total_flickr_photos = json.photos.total;
 	    
-	    // zero out the year/month counters
-	    
-	    for (this_year = 2006; this_year <= 2014; this_year++)
-	    {
-	    	count_per_year_arr[this_year] = 0;
-	    		    	
-	    	//for(this_month = 1; this_month <= 12; this_month++)
-	    	//{
-	    	//		
-	    	//}
-	    }
-	     
-	    
-	    
-	    
+		//.............................................................
+		// zero out the year/month counters and build arrays inside arrays..
+		
+		for (this_year = 2006; this_year <= 2014; this_year++)
+		{
+			count_per_year_arr[this_year] = 0;
+				    	
+			for(this_month = 1; this_month <= 12; this_month++)
+			{				
+				count_per_month_and_year_arr[this_year] = new Array(0,0,0,0,0,0,0,0,0,0,0,0); // month arrays inside year array
+				//count_per_month_and_year_arr[this_year][this_month] = 0; // zero out the counter for this month    		
+				   		
+			} // end for(this_month = 1; this_month <= 12; this_month++)
+			
+		} // end for (this_year = 2006; this_year <= 2014; this_year++)   
+    	     
+	    //..................................................................
 	    // roll through the pages of photos...
 	    for (var this_page=1;this_page<=json.photos.pages;this_page++)
 	    {
@@ -77,7 +96,8 @@ $(document).ready(function(){
 	    		
 	    		// get each photo info..
 	    		$.each(json.photos.photo,function(i,this_photo){
-					count++;
+					
+					count++; // count each photo as we process it...
 					$("#flickr_data").append(count + ': '+ this_photo.datetaken+';'+this_photo.longitude+','+this_photo.latitude+'|');
 					$("#flickr_count").html('<p>Loading Photos From Flickr.com tagged with "Hope" and "Obama": <b>'+count+'</b></p>');					
 					$("#status_message").html('<h2>One Moment Please...</h2>');
@@ -86,8 +106,22 @@ $(document).ready(function(){
 					year = this_photo.datetaken.substr(0,4);
 					month = this_photo.datetaken.substr(5,2);
 					
+					// strip leading zeros from the month
+					//if (month.substr(0,1) === '0')
+					//	month = month.substr(1,1);
+						
+					//month_and_year = year+'-'+month;
+					
 					// increment the counter for the year this photo was taken
 					count_per_year_arr[year]++; 
+					
+					// increment the counter for the month and year this photo was taken
+					//count_per_month_arr[month_and_year]++;
+					//count_per_month_arr[this_month] = 0;
+	    			//count_per_month_and_year_arr[year] = count_per_month_arr[this_month];
+					//count_per_month_and_year_arr[year][month]++;
+					//count_per_month_and_year_arr[this_year].count_per_month_arr[this_month]++;// count_per_month_arr[this_month];
+					count_per_month_and_year_arr[0][1] = count_per_month_and_year_arr[year][1] + 1; //     		
 					
 					// calculate the progress bar percentage
 					var progress_bar = document.getElementById('progress-bar');
@@ -120,27 +154,38 @@ $(document).ready(function(){
 		year_arr_index = 0;
 		month_arr_index = 0;
 		
-		for (var this_year = 2006; this_year <= 2014; this_year++)
+		for (this_year = 2006; this_year <= 2014; this_year++)
 	    {
-	    	
-	    	// labels...
+	    	// year labels...
 	    	year_labels_arr[year_arr_index] = this_year;
 	    		    	
 	    	// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
 	    	year_data_arr[year_arr_index] = count_per_year_arr[this_year];
 	    	
-	    	year_arr_index++;
+	    	for(this_month = 1; this_month <= 12; this_month++)
+	    	{	
+	    		// monthly labels...
+	    		month_labels_arr[month_arr_index] = this_month + '-' + this_year;
+	    		    	
+	    		// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
+	    		month_data_arr[month_arr_index] = count_per_month_arr[this_year][this_month];
+	    		    	
+	    		// increment the monthly index
+	    		month_arr_index++;
+	    		
+	    	} // end for(this_month = 1; this_month <= 12; this_month++)
 	    	
-	    	//for(this_month = 1; this_month <= 12; this_month++)
-	    	//{
-	    	//		
-	    	//}
-	    }
+	    	// increment the yearly index
+	    	year_arr_index++;
+
+	    } // end for (this_year = 2006; this_year <= 2014; this_year++)
 	    
 	    //.................................................
 	    // DEBUG
-	    console.debug('yAxis labels = ' + year_labels_arr);
-		console.debug('highcharts data array = ' + year_data_arr);
+	    console.debug('YEARLY: yAxis labels = ' + year_labels_arr);
+		console.debug('YEARLY: highcharts data array = ' + year_data_arr);
+	    console.debug('MONTHLY: yAxis labels = ' + month_labels_arr);
+		console.debug('MONTHLY: highcharts data array = ' + month_data_arr);
 		
 		//.................................
 		// load the bar chart 
@@ -168,6 +213,7 @@ $(document).ready(function(){
 
 	}); //
 }); // end $(document).ready(function(){
+//#####################################################################################
 		</script>
   	</head>
 
