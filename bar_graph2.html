@@ -198,7 +198,8 @@ $(document).ready(function(){
 	            data: year_data_arr 
 	        }]
 	    }); // end $('#chart1').highcharts({
-
+		$('#yearly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
+		
 		$('#monthly_chart').highcharts({
 	       chart: {
 	            type: 'bar'
@@ -219,7 +220,7 @@ $(document).ready(function(){
 	            data: month_data_arr 
 	        }]
 	    }); // end $('#chart1').highcharts({
-
+		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
 
 	}); //
 }); // end $(document).ready(function(){
@@ -268,16 +269,9 @@ $(document).ready(function(){
    			<div class="well">
    				<p>
    					<div id="yearly_chart" style="height:100%; width:100%;"></div>
-   					<sub>
-   					 * Obama elected: November 4, 2008<br>
-   					 * Sworn into office: January 20, 2009
-   					</sub>
+   					
    					<hr>
    					<div id="monthly_chart" style="height:100%; width:100%;"></div>
-   					<sub>
-   					 * Obama elected: November 4, 2008<br>
-   					 * Sworn into office: January 20, 2009
-   					</sub>
    				</p>
 			</div><!-- well -->
 
