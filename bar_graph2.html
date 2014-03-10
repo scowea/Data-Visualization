@@ -30,11 +30,8 @@ count_per_year_arr = new Array();
 year_labels_arr = new Array();
 year_data_arr = new Array();
 year_arr_index = 0;
-
    
-count_per_month_and_year_arr = new Array();
- 
-
+count_per_month_arr = new Array();
 month_labels_arr = new Array();
 month_data_arr = new Array();
 month_arr_index = 0;
@@ -73,18 +70,17 @@ $(document).ready(function(){
 	    
 		//.............................................................
 		// zero out the year/month counters and build arrays inside arrays..
-		
 		for (this_year = 2006; this_year <= 2014; this_year++)
 		{
 			count_per_year_arr[this_year] = 0;
 				    	
 			for(this_month = 1; this_month <= 12; this_month++)
 			{				
-				count_per_month_and_year_arr[this_year] = new Array(0,0,0,0,0,0,0,0,0,0,0,0); // month arrays inside year array
+				//count_per_month_and_year_arr[this_year] = new Array(0,0,0,0,0,0,0,0,0,0,0,0); // month arrays inside year array
 				//count_per_month_and_year_arr[this_year][this_month] = 0; // zero out the counter for this month    		
-				   		
+				count_per_month_arr[this_month+''+this_year] = 0;   		
+				   						   		
 			} // end for(this_month = 1; this_month <= 12; this_month++)
-			
 		} // end for (this_year = 2006; this_year <= 2014; this_year++)   
     	     
 	    //..................................................................
@@ -107,22 +103,15 @@ $(document).ready(function(){
 					month = this_photo.datetaken.substr(5,2);
 					
 					// strip leading zeros from the month
-					//if (month.substr(0,1) === '0')
-					//	month = month.substr(1,1);
-						
-					//month_and_year = year+'-'+month;
-					
+					if (month.substr(0,1) === '0')
+						month = month.substr(1,1);
+							
 					// increment the counter for the year this photo was taken
 					count_per_year_arr[year]++; 
 					
-					// increment the counter for the month and year this photo was taken
-					//count_per_month_arr[month_and_year]++;
-					//count_per_month_arr[this_month] = 0;
-	    			//count_per_month_and_year_arr[year] = count_per_month_arr[this_month];
-					//count_per_month_and_year_arr[year][month]++;
-					//count_per_month_and_year_arr[this_year].count_per_month_arr[this_month]++;// count_per_month_arr[this_month];
-					count_per_month_and_year_arr[0][1] = count_per_month_and_year_arr[year][1] + 1; //     		
-					
+					// increment the counter for the month and year this photo was taken     		
+					count_per_month_arr[month+''+year]++;   		
+		
 					// calculate the progress bar percentage
 					var progress_bar = document.getElementById('progress-bar');
 					percentage_loaded = (count * 100)/total_flickr_photos;
@@ -159,17 +148,17 @@ $(document).ready(function(){
 	    	// year labels...
 	    	year_labels_arr[year_arr_index] = this_year;
 	    		    	
-	    	// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
+	    	// move the counts into the delivery array that highchart wants... index of 0,1,2,3,4,5,6,7,8,etc..
 	    	year_data_arr[year_arr_index] = count_per_year_arr[this_year];
 	    	
 	    	for(this_month = 1; this_month <= 12; this_month++)
 	    	{	
 	    		// monthly labels...
-	    		month_labels_arr[month_arr_index] = this_month + '-' + this_year;
+	    		month_labels_arr[month_arr_index] = this_month+'-'+this_year;
 	    		    	
 	    		// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
-	    		month_data_arr[month_arr_index] = count_per_month_arr[this_year][this_month];
-	    		    	
+	    		month_data_arr[month_arr_index] = count_per_month_arr[this_month+''+this_year];
+	    		   	
 	    		// increment the monthly index
 	    		month_arr_index++;
 	    		
@@ -189,12 +178,12 @@ $(document).ready(function(){
 		
 		//.................................
 		// load the bar chart 
-		$('#chart1').highcharts({
+		$('#yearly_chart').highcharts({
 	       chart: {
 	            type: 'bar'
 	        },
 	        title: {
-	            text: 'Flickr.com Photos taken each year tagged "Obama" and "Hope"'
+	            text: 'Flickr.com Photos taken each YEAR tagged "Obama" and "Hope"'
 	        },
 	        xAxis: {
 	            categories: year_labels_arr
@@ -207,6 +196,27 @@ $(document).ready(function(){
 	        series: [{
 	            name: 'Photos',
 	            data: year_data_arr 
+	        }]
+	    }); // end $('#chart1').highcharts({
+
+		$('#monthly_chart').highcharts({
+	       chart: {
+	            type: 'bar'
+	        },
+	        title: {
+	            text: 'Flickr.com Photos taken each MONTH tagged "Obama" and "Hope"'
+	        },
+	        xAxis: {
+	            categories: month_labels_arr
+	        },
+	        yAxis: {
+	            title: {
+	                text: 'Total Per Month'
+	            }
+	        },
+	        series: [{
+	            name: 'Photos',
+	            data: month_data_arr 
 	        }]
 	    }); // end $('#chart1').highcharts({
 
@@ -257,7 +267,13 @@ $(document).ready(function(){
      
    			<div class="well">
    				<p>
-   					<div id="chart1" style="height:100%; width:100%;"></div>
+   					<div id="yearly_chart" style="height:100%; width:100%;"></div>
+   					<sub>
+   					 * Obama elected: November 4, 2008<br>
+   					 * Sworn into office: January 20, 2009
+   					</sub>
+   					<hr>
+   					<div id="monthly_chart" style="height:100%; width:100%;"></div>
    					<sub>
    					 * Obama elected: November 4, 2008<br>
    					 * Sworn into office: January 20, 2009
