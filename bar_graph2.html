@@ -21,7 +21,16 @@ Date: 2014-02-01
 
  		<script src="js/jquery.min.js"></script>
 		<script src="highcharts/js/highcharts.js"></script>
-
+		
+		<script src="perfect-scrollbar/src/jquery.mousewheel.js"></script>
+		<script src="perfect-scrollbar/src/perfect-scrollbar.js"></script>
+		<link rel="stylesheet" href="perfect-scrollbar/src/perfect-scrollbar.css" type="text/css" media="screen"/>
+		<style>
+        	.contentHolder { position:relative; margin:10px 10px; padding:0px; width: 98%; height: 600px; overflow: hidden; }
+        	.contentHolder .content { background-image: url('./azusa.jpg'); width: 98%; height: 800px; }
+        	.spacer { text-align:center }
+      	</style>
+		
 		<script>
 //#####################################################################################
 count = 0;
@@ -56,6 +65,11 @@ apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&forma
 //..........................................................................    
 $(document).ready(function(){
     
+	$('#scrollbar5').perfectScrollbar({
+  		wheelSpeed: 20,
+  		wheelPropagation: true,
+  		includePadding: true
+	});	
     
     // get the data from flickr
     // see how many pages of photos we have...
@@ -222,7 +236,13 @@ $(document).ready(function(){
 	    }); // end $('#chart1').highcharts({
 		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
 
+		$('#scrollbar5').perfectScrollbar('update');
+
+			
+
 	}); //
+	
+		
 }); // end $(document).ready(function(){
 //#####################################################################################
 		</script>
@@ -254,7 +274,11 @@ $(document).ready(function(){
 		</div><!--/.navbar -->
   	
     	<div class="container">
-      	
+    	  
+    	  	
+    	<div id="scrollbar5" class="contentHolder"><div class="content">
+      
+    	
       		<br>	
        		<p>
        			<a class="btn btn-success btn-lg" role="button" href="index.html" >&laquo; Back to see more</a>
@@ -280,6 +304,9 @@ $(document).ready(function(){
       		<footer>
         		<p>&copy; SweetCodeSolutions 2014</p>
       		</footer>
+      	
+      	
+      	</div></div><!-- /tinyscroll and content  -->	
     	</div> <!-- /container -->
   	
     	<!-- Bootstrap core JavaScript
