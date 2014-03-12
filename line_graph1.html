@@ -4,42 +4,41 @@ Author: Scott M Weaver
 Date: 2014-02-01	
 -->
 <html>
-	<head>
+ 	<head>
   		<title>Data Visualization</title>
   		<meta charset="utf-8">
-    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-    	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
     	<link rel="icon" type="image/x-icon" href="favicon.ico" />
     	
-    	<!-- Bootstrap core CSS -->
- 		<link href="css/bootstrap.min.css" rel="stylesheet">
+     	<link href="css/bootstrap.min.css" rel="stylesheet">
     	<link href="css/jumbotron.css" rel="stylesheet">
-
+    
  		<script src="js/jquery.min.js"></script>
 		<script src="highcharts/js/highcharts.js"></script>
+		
+		<script>
+//#####################################################################################
+count_per_year_arr = new Array();
+year_labels_arr = new Array();
+year_data_arr = new Array();
+year_arr_index = 0;
+   
+count_per_month_arr = new Array();
+month_labels_arr = new Array();
+month_data_arr = new Array();
+month_arr_index = 0;
 
-<script>
-//#########################################################################
+count_per_day_arr = new Array();
+day_labels_arr = new Array();
+day_data_arr = new Array();
+day_arr_index = 0;
+
 count = 0;
-count_arr = new Array();
-x_axis_label = '';
-
-count_2006 = 0;
-count_2007 = 0;
-count_2008 = 0;
-count_2009 = 0;
-count_2010 = 0;
-count_2011 = 0;
-count_2012 = 0;
-count_2013 = 0;
-count_2014 = 0;
-
 percentage_loaded = 0;
-num_photos = 0;
-num_photo_pages = 0;
-arr_photos = new Array();
-apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken&sort=date-taken-asc";
+apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken";
 //Key:dd4eb2f7ebff37400f01aae57493f41e
 //Secret:7a6541283f6e96bf
 //sort=date-posted-asc (the default value), date-posted-desc, date-taken-asc, date-taken-desc
@@ -48,57 +47,82 @@ apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&forma
 
 // &has_geo=1 
 // &sort=date-taken-asc
-    
+ 
+//..........................................................................    
 $(document).ready(function(){
-        
+    	
     // get the data from flickr
     // see how many pages of photos we have...
     $.getJSON(apiurl,function(json){
     	
-    	//$("#flickr_data").html('<p>Number of Photo Pages:'+json.photos.pages+'</p>');
+    	// show status messages...
     	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
     	$("#loading_progressbar").html(percentage_loaded); 
 	    
+	    // total of all photos across all pages
 	    total_flickr_photos = json.photos.total;
 	    
+		//.............................................................
+		// zero out the day/year/month counters
+		for (this_year = 2006; this_year <= 2014; this_year++)
+		{
+			count_per_year_arr[this_year] = 0;
+				    	
+			for(this_month = 1; this_month <= 12; this_month++)
+			{				
+				count_per_month_arr[this_month+''+this_year] = 0;   		
+
+	    		// only collect the dailydata for january.
+	    		if ((this_year == 2009) && (this_month == 1))
+	    		{  		
+					for(this_day = 1; this_day <= 31; this_day++)
+					{				
+						count_per_day_arr[this_day+''+this_month+''+this_year] = 0;   		
+					} // end for(this_day = 1; this_day <= 12; this_day++)   						   		
+				} // end if ((this_year == 2009) && (this_month == 1))				   						   		
+			} // end for(this_month = 1; this_month <= 12; this_month++)
+		} // end for (this_year = 2006; this_year <= 2014; this_year++)   
+    	     
+	    //..................................................................
 	    // roll through the pages of photos...
 	    for (var this_page=1;this_page<=json.photos.pages;this_page++)
 	    {
 	    	// get data for this page of photos
 	    	$.getJSON(apiurl+'&page='+this_page,function(json){
 	    		
-	    		//$("#flickr_data").html('<p>Number of Photo Pages:'+json.photos.pages+'</p>');
-	    		
+	    		// get each photo info..
 	    		$.each(json.photos.photo,function(i,this_photo){
-					count++;
+					
+					count++; // count each photo as we process it...
 					$("#flickr_data").append(count + ': '+ this_photo.datetaken+';'+this_photo.longitude+','+this_photo.latitude+'|');
 					$("#flickr_count").html('<p>Loading Photos From Flickr.com tagged with "Hope" and "Obama": <b>'+count+'</b></p>');					
 					$("#status_message").html('<h2>One Moment Please...</h2>');
-					//var d = new Date(this_photo.datetaken );
-					//y = d.getFullYear();
 					
-				
-					// datetaken: 2008-10-29 16:42:07
-					var year = this_photo.datetaken.substr(0,4);
-					var month = this_photo.datetaken.substr(5,2);
-					//window.alert("year of current photo=|" + month+ '|');	
-				
-					//count_arr[year][month]= count_arr[year][month] + 1;
-					//count_arr[year][month]= count_arr[year][month] + 1;
+					// get the month and year of the date this photo was taken		
+					year = this_photo.datetaken.substr(0,4);
+					month = this_photo.datetaken.substr(5,2);
+					day = this_photo.datetaken.substr(8,2);
 					
-					// [Date.UTC(2010,01,01), 29.9],
-                	//[Date.UTC(2010,02,02), 71.5],
-                	//[Date.UTC(2010,04,03), 106.4],
-                	//[Date.UTC(2010,08,06), 129.2],
-            
-					if (count == 1)
-						x_axis_label = "'" + this_photo.datetaken.substr(0,10) + "'";
-					else
-						x_axis_label = "'" + x_axis_label + "','" + this_photo.datetaken.substr(0,10) + "'";
-						
-					if (year === "2006")
-						count_2006++;  
-					  
+					// strip leading zeros from the month or day
+					// EX: datetaken":"2013-11-05 13:28:40
+					if (month.substr(0,1) === '0')
+						month = month.substr(1,1);
+					if (day.substr(0,1) === '0')
+						day = day.substr(1,1);		
+					
+					// increment the counter for the year this photo was taken
+					count_per_year_arr[year]++; 
+					
+					// increment the counter for the month and year this photo was taken     		
+					count_per_month_arr[month+''+year]++;   		
+
+	    			// only collect the daily data for january.
+	    			if ((year == 2009) && (month == 1))
+	    			{
+						// increment the counter for the month and year this photo was taken     		
+						count_per_day_arr[day+''+month+''+year]++;   		
+					}
+					
 					// calculate the progress bar percentage
 					var progress_bar = document.getElementById('progress-bar');
 					percentage_loaded = (count * 100)/total_flickr_photos;
@@ -114,9 +138,10 @@ $(document).ready(function(){
 						// we are done so hide the progress bar
 						var progress_bar_container = document.getElementById('progress');
 						progress_bar_container.style.visibility="hidden";
+						
 					} // end if (count >= (total_flickr_photos-250))	  					
 				}); // end $.each(json.photos.photo,function(i,myresult){
-							
+					
 	    	}); // end $.getJSON(apiurl,function(json){    
 	    		
 	     } // end for (var this_page=1;this_page<=num_photo_pages;this_page++)
@@ -124,69 +149,226 @@ $(document).ready(function(){
 	 }); // end $.getJSON(apiurl,function(json){
 	
 	$(window).load(function() {
+					
+		// build the yAxis labels and get data in a format that highcharts likes
+		year_arr_index = 0;
+		month_arr_index = 0;
+		day_arr_index = 0;
 		
+		for (this_year = 2006; this_year <= 2014; this_year++)
+	    {
+	    	// year labels...
+	    	year_labels_arr[year_arr_index] = this_year;
+	    		    	
+	    	// move the counts into the delivery array that highchart wants... index of 0,1,2,3,4,5,6,7,8,etc..
+	    	year_data_arr[year_arr_index] = count_per_year_arr[this_year];
+	    	
+	    	for(this_month = 1; this_month <= 12; this_month++)
+	    	{	
+	    		// monthly labels...
+	    		month_labels_arr[month_arr_index] = this_month+'-'+this_year;
+	    		    	
+	    		// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
+	    		month_data_arr[month_arr_index] = count_per_month_arr[this_month+''+this_year];
+	    		   		    		
+	    		// only collect the data for january.
+	    		if ((this_year == 2009) && (this_month == 1))
+	    		{
+	    			for(this_day = 1; this_day <= 31; this_day++)
+	    			{
+	    				// monthly labels...
+	    				day_labels_arr[day_arr_index] = this_month+'-'+this_day+'-'+this_year;
+	    		    	
+	    				// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
+	    				day_data_arr[day_arr_index] = count_per_day_arr[this_day+''+this_month+''+this_year];
+	    		   	
+	    				// increment the monthly index
+	    				day_arr_index++;
+	    			} // end for(this_day = 1; this_day <= 31; this_day++)
+	    			  
+	    		} // end if ((year == 2009) && (month == 1))
+	    		
+	    		// increment the monthly index
+	    		month_arr_index++;
+
+	    	} // end for(this_month = 1; this_month <= 12; this_month++)
+	    		    	
+	    	// increment the yearly index
+	    	year_arr_index++;
+
+	    } // end for (this_year = 2006; this_year <= 2014; this_year++)
+	    
+	    //.................................................
+	    // DEBUG
+	    console.debug('YEARLY: yAxis labels = ' + year_labels_arr);
+		console.debug('YEARLY: highcharts data array = ' + year_data_arr);
+	    console.debug('MONTHLY: yAxis labels = ' + month_labels_arr);
+		console.debug('MONTHLY: highcharts data array = ' + month_data_arr);
+		console.debug('JANUARY2009: yAxis labels = ' + day_labels_arr);
+		console.debug('JANUARY2009: highcharts data array = ' + day_data_arr);
+
+		//.................................
+		// load the bar charts 		
+		////...............................................................................
 		// load the bar chart for visual example
-		 $('#chart1').highcharts({
+// load the bar chart for visual example
+		 $('#monthly_chart').highcharts({
+ 
+            chart: {
+                zoomType: 'x',
+                spacingRight: 20
+            },
             title: {
-                text: 'Monthly Count of Flickr.com Photos Tagged with "Hope" and "Obama"',
-                x: -20 //center
+                text: 'Monthly Count of Flickr.com photos that were tagged with "Hope" and "Obama"'
             },
             subtitle: {
-                text: 'Source: Flickr.com',
-                x: -20
+                text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' :
+                    'Pinch the chart to zoom in'
             },
             xAxis: {
-               
-            	type: 'datetime'
-        
+                type: 'datetime',
+                maxZoom: 3 * 24 * 3600000, // 3 days
+                title: {
+                    text: null
+                }
             },
             yAxis: {
                 title: {
-                    text: 'Count By Month'
-                },
-                plotLines: [{
-                    value: 0,
-                    width: 1,
-                    color: '#808080'
-                }]
+                    text: 'Count'
+                }
             },
             tooltip: {
-                valueSuffix: ''
+                shared: true
             },
             legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'middle',
-                borderWidth: 0
+                enabled: false
             },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, Highcharts.getOptions().colors[0]],
+                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                        ]
+                    },
+                    lineWidth: 1,
+                    marker: {
+                        enabled: false
+                    },
+                    shadow: false,
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    threshold: null
+                }
+            },
+    
             series: [{
-                name: 'Count',
-                //data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
-               
+                type: 'area',
+                name: 'Count Per Month',
+                pointInterval: 24 * 3600 * 1000, //
+                pointStart: Date.UTC(2006, 0, 01), // 2009, January(months start with 0 in js), day 
                 
-                 data: [
-                	[Date.UTC(2010,01,01), 120],
-                	[Date.UTC(2010,02,02), 71.5],
-                	[Date.UTC(2010,04,03), 106.4],
-                	[Date.UTC(2010,08,06), 129.2],
-                	[Date.UTC(2010,11,07), 144.0],
-                	[Date.UTC(2010,12,08), 176.0]
-                ] // end data
-                
+                data: month_data_arr
+                //data: [
+                //    0.8446, 0.8445, 0.8444, 0.8451,    0.8418, 0.8264,    0.8258, 0.8232,    0.8233, 0.8258,
+                ///    0.8283, 0.8278, 0.8256, 0.8292,    0.8239, 0.8239,    0.8245, 0.8265,    0.8261, 0.8269,
+                //    0.8273, 0.8244, 0.8244, 0.8172,    0.8139, 0.8146,    0.8164, 0.82,    0.8269, 0.8269,
+                //    0.8269
+               	// ]
             }]
-        });// end highcharts
+        });
+        $('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub><hr>');
 
+//..........................................................................
+
+		 $('#daily_chart').highcharts({
+ 
+            chart: {
+                zoomType: 'x',
+                spacingRight: 20
+            },
+            title: {
+                text: 'Daily Count of Flickr.com photos taken during January 2009 that were tagged with "Hope" and "Obama"'
+            },
+            subtitle: {
+                text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' :
+                    'Pinch the chart to zoom in'
+            },
+            xAxis: {
+                type: 'datetime',
+                maxZoom: 3 * 24 * 3600000, // 3 days
+                title: {
+                    text: null
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Count'
+                }
+            },
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, Highcharts.getOptions().colors[0]],
+                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                        ]
+                    },
+                    lineWidth: 1,
+                    marker: {
+                        enabled: false
+                    },
+                    shadow: false,
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    threshold: null
+                }
+            },
+    
+            series: [{
+                type: 'area',
+                name: 'Count Per Day',
+                pointInterval: 24 * 3600 * 1000, //
+                pointStart: Date.UTC(2009, 0, 01), // 2009, January(months start with 0 in js), day 
+                
+                data: day_data_arr
+                //data: [
+                //    0.8446, 0.8445, 0.8444, 0.8451,    0.8418, 0.8264,    0.8258, 0.8232,    0.8233, 0.8258,
+                ///    0.8283, 0.8278, 0.8256, 0.8292,    0.8239, 0.8239,    0.8245, 0.8265,    0.8261, 0.8269,
+                //    0.8273, 0.8244, 0.8244, 0.8172,    0.8139, 0.8146,    0.8164, 0.82,    0.8269, 0.8269,
+                //    0.8269
+               	// ]
+            }]
+        });
+        $('#daily_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
+			
 	}); // end $(window).load(function() {
+	
 }); // end $(document).ready(function(){
-//#########################################################################	
-</script>
-  
-	</head>
+//#####################################################################################
+		</script>
+  	</head>
 
-  	<body>
+	<body>
   	
     	<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      		<div class="container">
+    		<div class="container">
         		<div class="navbar-header">
           			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
             			<span class="sr-only">Toggle navigation</span>
@@ -196,23 +378,24 @@ $(document).ready(function(){
           			</button>
           
           			<a class="navbar-brand" href="index.html">Data Visualization</a>
-        		</div>
-        		
+        		</div><!--/.navbar-header -->
+        
         		<div class="collapse navbar-collapse">
           			<ul class="nav navbar-nav">
           			<li><a href="index.html">Home</a></li>
           			<li><a href="about.html">About</a></li>       
           			</ul>
         		</div><!--/.nav-collapse -->
-      		</div><!-- /.container -->
-    	</div><!--/.navbar -->
+    		</div><!--/.container -->
+      
+		</div><!--/.navbar -->
   	
     	<div class="container">
-      		<br>
+    	
+      		<br>	
        		<p>
        			<a class="btn btn-success btn-lg" role="button" href="index.html" >&laquo; Back to see more</a>
-       			<font color=red>Under Construction. Data points on Line Graph below are hardcoded as an example of this type data representation.</font>
-       			<div id="status_message"></div>
+       			  
        		</p>
       		
 			<div id="progress" class="progress">
@@ -220,27 +403,30 @@ $(document).ready(function(){
 			</div>
        		<div id="flickr_count"></div>
      
-   			<div class="well">
-   				<p>
-   					<div id="chart1" style="height:100%; width:100%;"></div> 
-   					<sub>
-   				 	* Obama elected: November 4, 2008<br>
-   				 	* Sworn into office: January 20, 2009
-   				 	</sub>
-   				</p>
-   			</div><!--/.well -->
-
+     
+     		<div class="well"><p>
+     			<div id="status_message"></div>
+     			<div id="yearly_chart" style="height:100%; width:100%;"></div>
+				
+     			<div id="daily_chart" style="height:100%; width:100%;"></div>
+     			<div id="january_2009_chart" style="height:100%; width:100%;"></div>
+     		</p></div>
+     				
+   		
       		<hr>
 
       		<footer>
         		<p>&copy; SweetCodeSolutions 2014</p>
       		</footer>
-    	</div> <!-- /container -->
+      	
+        </div> <!-- /container -->
   	
     	<!-- Bootstrap core JavaScript
     	================================================== -->
     	<!-- Placed at the end of the document so the pages load faster -->
   
     	<script src="js/bootstrap.min.js"></script>
-  	</body>
+	</body>
 </html>
+		
+		
