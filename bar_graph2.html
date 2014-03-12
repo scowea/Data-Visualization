@@ -220,8 +220,13 @@ $(document).ready(function(){
 		console.debug('JANUARY2009: yAxis labels = ' + day_labels_arr);
 		console.debug('JANUARY2009: highcharts data array = ' + day_data_arr);
 
+
+
 		//.................................
-		// load the bar chart 
+		// load the bar charts 
+		//$('#yearly_chart').html('<div class="well"><p>');
+		
+		////...............................................................................
 		$('#yearly_chart').highcharts({
 	       chart: {
 	            type: 'bar'
@@ -242,8 +247,10 @@ $(document).ready(function(){
 	            data: year_data_arr 
 	        }]
 	    }); // end $('#chart1').highcharts({
-		$('#yearly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
-/*		
+		$('#yearly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub><hr>');
+		//$('#charts_container') = $('#charts_container') + $('#yearly_chart'); 
+	
+		//...............................................................................
 		$('#monthly_chart').highcharts({
 	       chart: {
 	            type: 'bar'
@@ -264,8 +271,11 @@ $(document).ready(function(){
 	            data: month_data_arr 
 	        }]
 	    }); // end $('#chart1').highcharts({
-		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
-*/
+		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub><hr>');
+		//$('#charts_container') = $('#charts_container') + $('#monthly_chart'); 
+
+
+/*
 		//...............................................
 		$('#january_2009_chart').highcharts({
 	       chart: {
@@ -284,13 +294,15 @@ $(document).ready(function(){
 	        },
 	        series: [{
 	            name: 'Photos',
-	            data: day_data_arr 
+	            data: day_data_arr 		
 	        }]
 	        //,
 	        //turboThreshold : 0
 	    }); // end $('#chart1').highcharts({
 		$('#january_2009_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
-			
+*/			
+
+		//$('#charts_container').append('</div></p>');
 	}); //
 	
 }); // end $(document).ready(function(){
@@ -336,17 +348,14 @@ $(document).ready(function(){
 			</div>
        		<div id="flickr_count"></div>
      
-   			<div class="well">
-   				<p>
-   					<div id="yearly_chart" style="height:100%; width:100%;"></div>
-   					
-   					<hr>
-   					<div id="monthly_chart" style="height:100%; width:100%;"></div>
-   					
-   					<hr>
-   					<div id="january_2009_chart" style="height:100%; width:100%;"></div>
-   				</p>
-			</div><!-- well -->
+     
+     		<div class="well"><p>
+     			<div id="yearly_chart" style="height:100%; width:100%;"></div>
+     			<div id="monthly_chart" style="height:100%; width:100%;"></div>
+     			<div id="january_2009_chart" style="height:100%; width:100%;"></div>
+     		</p></div>
+     				
+   			
 
       		<hr>
 
