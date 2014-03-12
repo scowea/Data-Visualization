@@ -10,26 +10,14 @@ Date: 2014-02-01
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    	<meta name="description" content="">
-    	<meta name="author" content="">
+ 
     	<link rel="icon" type="image/x-icon" href="favicon.ico" />
-    	<link rel="shortcut icon" href="docs-assets/favicon.ico">
-    	<link rel="stylesheet" href="css/layout.css">
     	
-    	<!-- Bootstrap core CSS -->
-    	<link href="css/bootstrap.css" rel="stylesheet">
-
+     	<link href="css/bootstrap.min.css" rel="stylesheet">
+    	<link href="css/jumbotron.css" rel="stylesheet">
+    
  		<script src="js/jquery.min.js"></script>
 		<script src="highcharts/js/highcharts.js"></script>
-		
-		<script src="perfect-scrollbar/src/jquery.mousewheel.js"></script>
-		<script src="perfect-scrollbar/src/perfect-scrollbar.js"></script>
-		<link rel="stylesheet" href="perfect-scrollbar/src/perfect-scrollbar.css" type="text/css" media="screen"/>
-		<style>
-        	.contentHolder { position:relative; margin:10px 10px; padding:0px; width: 98%; height: 600px; overflow: hidden; }
-        	.contentHolder .content { background-image: url('./azusa.jpg'); width: 98%; height: 800px; }
-        	.spacer { text-align:center }
-      	</style>
 		
 		<script>
 //#####################################################################################
@@ -44,6 +32,11 @@ count_per_month_arr = new Array();
 month_labels_arr = new Array();
 month_data_arr = new Array();
 month_arr_index = 0;
+
+count_per_day_arr = new Array();
+day_labels_arr = new Array();
+day_data_arr = new Array();
+day_arr_index = 0;
 
 percentage_loaded = 0;
 num_photos = 0;
@@ -65,12 +58,7 @@ apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&forma
 //..........................................................................    
 $(document).ready(function(){
     
-	$('#scrollbar5').perfectScrollbar({
-  		wheelSpeed: 20,
-  		wheelPropagation: true,
-  		includePadding: true
-	});	
-    
+	
     // get the data from flickr
     // see how many pages of photos we have...
     $.getJSON(apiurl,function(json){
@@ -83,17 +71,23 @@ $(document).ready(function(){
 	    total_flickr_photos = json.photos.total;
 	    
 		//.............................................................
-		// zero out the year/month counters and build arrays inside arrays..
+		// zero out the day/year/month counters
 		for (this_year = 2006; this_year <= 2014; this_year++)
 		{
 			count_per_year_arr[this_year] = 0;
 				    	
 			for(this_month = 1; this_month <= 12; this_month++)
 			{				
-				//count_per_month_and_year_arr[this_year] = new Array(0,0,0,0,0,0,0,0,0,0,0,0); // month arrays inside year array
-				//count_per_month_and_year_arr[this_year][this_month] = 0; // zero out the counter for this month    		
 				count_per_month_arr[this_month+''+this_year] = 0;   		
-				   						   		
+
+	    		// only collect the dailydata for january.
+	    		if ((this_year == 2009) && (this_month == 1))
+	    		{  		
+					for(this_day = 1; this_day <= 31; this_day++)
+					{				
+						count_per_day_arr[this_day+''+this_month+''+this_year] = 0;   		
+					} // end for(this_month = 1; this_month <= 12; this_month++)   						   		
+				}				   						   		
 			} // end for(this_month = 1; this_month <= 12; this_month++)
 		} // end for (this_year = 2006; this_year <= 2014; this_year++)   
     	     
@@ -115,17 +109,33 @@ $(document).ready(function(){
 					// get the month and year of the date this photo was taken		
 					year = this_photo.datetaken.substr(0,4);
 					month = this_photo.datetaken.substr(5,2);
-					
-					// strip leading zeros from the month
+					day = this_photo.datetaken.substr(7,2);
+
+					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+					// strip leading zeros from the month or day
 					if (month.substr(0,1) === '0')
 						month = month.substr(1,1);
-							
+					if (day.substr(0,1) === '0')
+						day = day.substr(1,1);		
+					
+					// DEBUG:
+					// TEST THIS FUNCTIONALITY. WHAT IS THE FORMAT COMING FROM FLICKR.COM
+					// DOES IT CONTAIN LEADING ZEROS?
+					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 					// increment the counter for the year this photo was taken
 					count_per_year_arr[year]++; 
 					
 					// increment the counter for the month and year this photo was taken     		
 					count_per_month_arr[month+''+year]++;   		
-		
+
+	    			// only collect the daily data for january.
+	    			if ((this_year == 2009) && (this_month == 1))
+	    			{
+						// increment the counter for the month and year this photo was taken     		
+						count_per_day_arr[day+''+month+''+year]++;   		
+					}
+					
 					// calculate the progress bar percentage
 					var progress_bar = document.getElementById('progress-bar');
 					percentage_loaded = (count * 100)/total_flickr_photos;
@@ -156,6 +166,7 @@ $(document).ready(function(){
 		// build the yAxis labels and get data in a format that highcharts likes
 		year_arr_index = 0;
 		month_arr_index = 0;
+		day_arr_index = 0;
 		
 		for (this_year = 2006; this_year <= 2014; this_year++)
 	    {
@@ -172,12 +183,29 @@ $(document).ready(function(){
 	    		    	
 	    		// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
 	    		month_data_arr[month_arr_index] = count_per_month_arr[this_month+''+this_year];
+	    		   		    		
+	    		// only collect the data for january.
+	    		if ((year == 2009) && (month == 1))
+	    		{
+	    			for(this_day = 1; this_day <= 31; this_day++)
+	    			{
+	    				// monthly labels...
+	    				day_labels_arr[day_arr_index] = this_day+'-'+this_month+'-'+this_year;
+	    		    	
+	    				// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
+	    				day_data_arr[day_arr_index] = count_per_day_arr[this_day+''+this_month+''+this_year];
 	    		   	
+	    				// increment the monthly index
+	    				day_arr_index++;
+	    			} // end for(this_day = 1; this_day <= 31; this_day++)
+	    			  
+	    		} // end if ((year == 2009) && (month == 1))
+	    		
 	    		// increment the monthly index
 	    		month_arr_index++;
-	    		
+
 	    	} // end for(this_month = 1; this_month <= 12; this_month++)
-	    	
+	    		    	
 	    	// increment the yearly index
 	    	year_arr_index++;
 
@@ -189,7 +217,9 @@ $(document).ready(function(){
 		console.debug('YEARLY: highcharts data array = ' + year_data_arr);
 	    console.debug('MONTHLY: yAxis labels = ' + month_labels_arr);
 		console.debug('MONTHLY: highcharts data array = ' + month_data_arr);
-		
+		console.debug('JANUARY2009: yAxis labels = ' + day_labels_arr);
+		console.debug('JANUARY2009: highcharts data array = ' + day_data_arr);
+
 		//.................................
 		// load the bar chart 
 		$('#yearly_chart').highcharts({
@@ -213,7 +243,7 @@ $(document).ready(function(){
 	        }]
 	    }); // end $('#chart1').highcharts({
 		$('#yearly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
-		
+/*		
 		$('#monthly_chart').highcharts({
 	       chart: {
 	            type: 'bar'
@@ -235,20 +265,40 @@ $(document).ready(function(){
 	        }]
 	    }); // end $('#chart1').highcharts({
 		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
-
-		$('#scrollbar5').perfectScrollbar('update');
-
+*/
+		//...............................................
+		$('#january_2009_chart').highcharts({
+	       chart: {
+	            type: 'bar'
+	        },
+	        title: {
+	            text: 'Flickr.com Photos taken in January 2009 tagged "Obama" and "Hope"'
+	        },
+	        xAxis: {
+	            categories: day_labels_arr
+	        },
+	        yAxis: {
+	            title: {
+	                text: 'Total in January 2009'
+	            }
+	        },
+	        series: [{
+	            name: 'Photos',
+	            data: day_data_arr 
+	        }]
+	        //,
+	        //turboThreshold : 0
+	    }); // end $('#chart1').highcharts({
+		$('#january_2009_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
 			
-
 	}); //
 	
-		
 }); // end $(document).ready(function(){
 //#####################################################################################
 		</script>
   	</head>
 
-	<body class="claro">
+	<body>
   	
     	<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     		<div class="container">
@@ -274,10 +324,6 @@ $(document).ready(function(){
 		</div><!--/.navbar -->
   	
     	<div class="container">
-    	  
-    	  	
-    	<div id="scrollbar5" class="contentHolder"><div class="content">
-      
     	
       		<br>	
        		<p>
@@ -296,6 +342,9 @@ $(document).ready(function(){
    					
    					<hr>
    					<div id="monthly_chart" style="height:100%; width:100%;"></div>
+   					
+   					<hr>
+   					<div id="january_2009_chart" style="height:100%; width:100%;"></div>
    				</p>
 			</div><!-- well -->
 
@@ -305,9 +354,7 @@ $(document).ready(function(){
         		<p>&copy; SweetCodeSolutions 2014</p>
       		</footer>
       	
-      	
-      	</div></div><!-- /tinyscroll and content  -->	
-    	</div> <!-- /container -->
+        </div> <!-- /container -->
   	
     	<!-- Bootstrap core JavaScript
     	================================================== -->
