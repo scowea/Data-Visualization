@@ -109,20 +109,15 @@ $(document).ready(function(){
 					// get the month and year of the date this photo was taken		
 					year = this_photo.datetaken.substr(0,4);
 					month = this_photo.datetaken.substr(5,2);
-					day = this_photo.datetaken.substr(7,2);
-
-					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+					day = this_photo.datetaken.substr(8,2);
+					
 					// strip leading zeros from the month or day
+					// EX: datetaken":"2013-11-05 13:28:40
 					if (month.substr(0,1) === '0')
 						month = month.substr(1,1);
 					if (day.substr(0,1) === '0')
 						day = day.substr(1,1);		
 					
-					// DEBUG:
-					// TEST THIS FUNCTIONALITY. WHAT IS THE FORMAT COMING FROM FLICKR.COM
-					// DOES IT CONTAIN LEADING ZEROS?
-					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 					// increment the counter for the year this photo was taken
 					count_per_year_arr[year]++; 
 					
@@ -130,7 +125,7 @@ $(document).ready(function(){
 					count_per_month_arr[month+''+year]++;   		
 
 	    			// only collect the daily data for january.
-	    			if ((this_year == 2009) && (this_month == 1))
+	    			if ((year == 2009) && (month == 1))
 	    			{
 						// increment the counter for the month and year this photo was taken     		
 						count_per_day_arr[day+''+month+''+year]++;   		
@@ -185,12 +180,12 @@ $(document).ready(function(){
 	    		month_data_arr[month_arr_index] = count_per_month_arr[this_month+''+this_year];
 	    		   		    		
 	    		// only collect the data for january.
-	    		if ((year == 2009) && (month == 1))
+	    		if ((this_year == 2009) && (this_month == 1))
 	    		{
 	    			for(this_day = 1; this_day <= 31; this_day++)
 	    			{
 	    				// monthly labels...
-	    				day_labels_arr[day_arr_index] = this_day+'-'+this_month+'-'+this_year;
+	    				day_labels_arr[day_arr_index] = this_month+'-'+this_day+'-'+this_year;
 	    		    	
 	    				// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
 	    				day_data_arr[day_arr_index] = count_per_day_arr[this_day+''+this_month+''+this_year];
@@ -274,8 +269,6 @@ $(document).ready(function(){
 		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub><hr>');
 		//$('#charts_container') = $('#charts_container') + $('#monthly_chart'); 
 
-
-/*
 		//...............................................
 		$('#january_2009_chart').highcharts({
 	       chart: {
@@ -300,7 +293,7 @@ $(document).ready(function(){
 	        //turboThreshold : 0
 	    }); // end $('#chart1').highcharts({
 		$('#january_2009_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
-*/			
+			
 
 		//$('#charts_container').append('</div></p>');
 	}); //
@@ -355,8 +348,7 @@ $(document).ready(function(){
      			<div id="january_2009_chart" style="height:100%; width:100%;"></div>
      		</p></div>
      				
-   			
-
+   		
       		<hr>
 
       		<footer>
