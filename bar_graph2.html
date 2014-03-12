@@ -21,8 +21,6 @@ Date: 2014-02-01
 		
 		<script>
 //#####################################################################################
-count = 0;
-
 count_per_year_arr = new Array();
 year_labels_arr = new Array();
 year_data_arr = new Array();
@@ -38,11 +36,8 @@ day_labels_arr = new Array();
 day_data_arr = new Array();
 day_arr_index = 0;
 
+count = 0;
 percentage_loaded = 0;
-num_photos = 0;
-num_photo_pages = 0;
-arr_photos = new Array();
-
 apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken";
 //Key:dd4eb2f7ebff37400f01aae57493f41e
 //Secret:7a6541283f6e96bf
@@ -53,12 +48,9 @@ apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&forma
 // &has_geo=1 
 // &sort=date-taken-asc
  
-     
-    
 //..........................................................................    
 $(document).ready(function(){
-    
-	
+    	
     // get the data from flickr
     // see how many pages of photos we have...
     $.getJSON(apiurl,function(json){
@@ -86,8 +78,8 @@ $(document).ready(function(){
 					for(this_day = 1; this_day <= 31; this_day++)
 					{				
 						count_per_day_arr[this_day+''+this_month+''+this_year] = 0;   		
-					} // end for(this_month = 1; this_month <= 12; this_month++)   						   		
-				}				   						   		
+					} // end for(this_day = 1; this_day <= 12; this_day++)   						   		
+				} // end if ((this_year == 2009) && (this_month == 1))				   						   		
 			} // end for(this_month = 1; this_month <= 12; this_month++)
 		} // end for (this_year = 2006; this_year <= 2014; this_year++)   
     	     
@@ -215,12 +207,8 @@ $(document).ready(function(){
 		console.debug('JANUARY2009: yAxis labels = ' + day_labels_arr);
 		console.debug('JANUARY2009: highcharts data array = ' + day_data_arr);
 
-
-
 		//.................................
-		// load the bar charts 
-		//$('#yearly_chart').html('<div class="well"><p>');
-		
+		// load the bar charts 		
 		////...............................................................................
 		$('#yearly_chart').highcharts({
 	       chart: {
@@ -241,10 +229,9 @@ $(document).ready(function(){
 	            name: 'Photos',
 	            data: year_data_arr 
 	        }]
-	    }); // end $('#chart1').highcharts({
+	    }); // end $('#yearly_chart').highcharts({
 		$('#yearly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub><hr>');
-		//$('#charts_container') = $('#charts_container') + $('#yearly_chart'); 
-	
+		
 		//...............................................................................
 		$('#monthly_chart').highcharts({
 	       chart: {
@@ -265,10 +252,9 @@ $(document).ready(function(){
 	            name: 'Photos',
 	            data: month_data_arr 
 	        }]
-	    }); // end $('#chart1').highcharts({
+	    }); // end $('#monthly_chart').highcharts({
 		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub><hr>');
-		//$('#charts_container') = $('#charts_container') + $('#monthly_chart'); 
-
+		
 		//...............................................
 		$('#january_2009_chart').highcharts({
 	       chart: {
@@ -291,12 +277,10 @@ $(document).ready(function(){
 	        }]
 	        //,
 	        //turboThreshold : 0
-	    }); // end $('#chart1').highcharts({
+	    }); // end $('#january_2009_chart').highcharts({
 		$('#january_2009_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
 			
-
-		//$('#charts_container').append('</div></p>');
-	}); //
+	}); // end $(window).load(function() {
 	
 }); // end $(document).ready(function(){
 //#####################################################################################
@@ -333,7 +317,7 @@ $(document).ready(function(){
       		<br>	
        		<p>
        			<a class="btn btn-success btn-lg" role="button" href="index.html" >&laquo; Back to see more</a>
-       			<div id="status_message"></div>  
+       			  
        		</p>
       		
 			<div id="progress" class="progress">
@@ -343,6 +327,7 @@ $(document).ready(function(){
      
      
      		<div class="well"><p>
+     			<div id="status_message"></div>
      			<div id="yearly_chart" style="height:100%; width:100%;"></div>
      			<div id="monthly_chart" style="height:100%; width:100%;"></div>
      			<div id="january_2009_chart" style="height:100%; width:100%;"></div>
