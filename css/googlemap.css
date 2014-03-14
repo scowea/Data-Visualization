@@ -1,0 +1,5 @@
+/* Move down content because we have a fixed navbar that is 50px tall */
+ html, body, #map_container,#map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 10px

@@ -132,7 +132,7 @@ $(document).ready(function(){
 	    			if (count >= (total_flickr_photos-250))
 	    			{
 	    				$("#status_message").html(''); // clear the status message
-						$("#flickr_count").html('<p>Photos Loaded: <b>'+total_flickr_photos+'</b></p>');
+						$("#flickr_count").html('<p>Photos Loaded: <b>'+total_flickr_photos+'</b> [<a target=_blank href='+apiurl+'>Data Source</a>]</p>');
 						progress_bar.style.width = '100%';
 						
 						// we are done so hide the progress bar
@@ -215,7 +215,7 @@ $(document).ready(function(){
 	
 //..........................................................................
 
-		 $('#daily_chart').highcharts({
+		 $('#january_2009_chart').highcharts({
  
             chart: {
                 zoomType: 'x',
@@ -285,7 +285,7 @@ $(document).ready(function(){
                	// ]
             }]
         });
-        $('#daily_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
+        $('#january_2009_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
 			
 	}); // end $(window).load(function() {
 	
@@ -331,12 +331,10 @@ $(document).ready(function(){
 				<div id="progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div> 
 			</div>
        		<div id="flickr_count"></div>
-     
-     
+     	
      		<div class="well"><p>
      			<div id="status_message"></div>
      			<div id="yearly_chart" style="height:100%; width:100%;"></div>
-				
      			<div id="daily_chart" style="height:100%; width:100%;"></div>
      			<div id="january_2009_chart" style="height:100%; width:100%;"></div>
      		</p></div>

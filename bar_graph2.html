@@ -58,7 +58,8 @@ $(document).ready(function(){
     	// show status messages...
     	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
     	$("#loading_progressbar").html(percentage_loaded); 
-	    
+	    $("#data_source").html("[<a target=_blank href="+apiurl+">Data Source</a>]");
+	  
 	    // total of all photos across all pages
 	    total_flickr_photos = json.photos.total;
 	    
@@ -83,7 +84,7 @@ $(document).ready(function(){
 			} // end for(this_month = 1; this_month <= 12; this_month++)
 		} // end for (this_year = 2006; this_year <= 2014; this_year++)   
     	     
-	    //..................................................................
+	    //.................................................................
 	    // roll through the pages of photos...
 	    for (var this_page=1;this_page<=json.photos.pages;this_page++)
 	    {
@@ -132,7 +133,7 @@ $(document).ready(function(){
 	    			if (count >= (total_flickr_photos-250))
 	    			{
 	    				$("#status_message").html(''); // clear the status message
-						$("#flickr_count").html('<p>Photos Loaded: <b>'+total_flickr_photos+'</b></p>');
+						$("#flickr_count").html('<p>Photos Loaded: <b>'+total_flickr_photos+'</b> [<a target=_blank href='+apiurl+'>Data Source</a>]</p>');
 						progress_bar.style.width = '100%';
 						
 						// we are done so hide the progress bar
@@ -324,7 +325,6 @@ $(document).ready(function(){
 				<div id="progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div> 
 			</div>
        		<div id="flickr_count"></div>
-     
      
      		<div class="well"><p>
      			<div id="status_message"></div>
