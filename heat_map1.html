@@ -195,39 +195,34 @@ $(document).ready(function(){
 					// in for loop:
 					var lat = this_photo.latitude;
 					var lng = this_photo.longitude;
-				  	var myLatlng = new google.maps.LatLng(lat,lng);
-				  	
+				  	var myLatlng = new google.maps.LatLng(lat,lng);	
 				  	heat_map_data_arr[count-1] = myLatlng;  
-				  	
-				  	//heat_map_data_arr[0] = new google.maps.LatLng(37.782551, -122.445368);  
-					//heat_map_data_arr[1] = new google.maps.LatLng(37.782745, -122.444586);
-					//heat_map_data_arr[2] = new google.maps.LatLng(37.783371, -122.439687); 
-					//heat_map_data_arr[3] = new google.maps.LatLng(37.783368, -122.439666); 
-				  	
-					//heat_map_data_arr = [  
-					//	new google.maps.LatLng(37.782551, -122.445368),
-					 // 	new google.maps.LatLng(37.782745, -122.444586),
-					//  	new google.maps.LatLng(37.783371, -122.439687),
-					//  	new google.maps.LatLng(37.783368, -122.439666),
-					//];
-					
-				  	//var thumbnail = 'http://farm'+ this_photo.farm + '.staticflickr.com/'+ this_photo.server+ '/'+this_photo.id+'_'+this_photo.secret+'_t.jpg';
+				  					  					
+				  	var thumbnail = 'http://farm'+ this_photo.farm + '.staticflickr.com/'+ this_photo.server+ '/'+this_photo.id+'_'+this_photo.secret+'_t.jpg';
 				  	// Format: http://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
-				  	
-				  	//var marker = new google.maps.Marker({
-				    //	position: myLatlng,
-				    //  	map: map,
-				    //	title: jQuery.trim(this_photo.title),
-				    // 	visible: true,
-  					//	clickable: true,
-  					//	icon: thumbnail,
-  					//	zIndex: count // puts the newest thumbnails on top of the stack
-  						//shadow: 'http://www.mysite.com/markershadow.png'
-					//});
-					
-					// this_photo.secret
+				  	// this_photo.secret
 					// this_photo.farm
 					// this_photo.id
+					
+				  	var marker = new google.maps.Marker({
+				    	position: myLatlng,
+				      	map: map,
+				    	title: jQuery.trim(this_photo.title),
+				     	visible: true,
+  						clickable: true,
+  						icon: './docs-assetts/small_dot.png'
+  					//	zIndex: count // puts the newest thumbnails on top of the stack
+  						//shadow: 'http://www.mysite.com/markershadow.png'
+					});
+					
+					var infowindow = new google.maps.InfoWindow({
+      					content: '<h3>'+this_photo.title+'</h3><img src="'+thumbnail+'" width=100% height=100% alt="'+this_photo.title+'" >'
+  					});
+
+  					google.maps.event.addListener(marker, 'click', function() {
+    					infowindow.open(map,marker);
+  					});
+  					
 					//............................
 										
 				}); // end $.each(json.photos.photo,function(i,myresult){
@@ -235,48 +230,24 @@ $(document).ready(function(){
 	    	}); // end $.getJSON(apiurl,function(json){    
 	    		
 	     } // end for (var this_page=1;this_page<=num_photo_pages;this_page++)
-
-
-
-//heat_map_data_arr = [  
-//	new google.maps.LatLng(37.782551, -122.445368),
-//	new google.maps.LatLng(37.782745, -122.444586),
-//	new google.maps.LatLng(37.783371, -122.439687),
-//	new google.maps.LatLng(37.783368, -122.439666),
-//];
-			  	
-
-				  	
-		//heat_map_data_arr[0] = new google.maps.LatLng(37.782551, -122.445368);  
-		//heat_map_data_arr[1] = new google.maps.LatLng(37.782745, -122.444586);
-		//heat_map_data_arr[2] = new google.maps.LatLng(37.783371, -122.439687); 
-		//heat_map_data_arr[3] = new google.maps.LatLng(37.783368, -122.439666); 
-					
-		//console.debug('OUTSIDE HeatMapData:  data array = ' + heat_map_data_arr);
-		//console.debug('PointData:  data array = ' + pointArray);
-		
-		//..........................................................................
 	
-
-
 	 }); // end $.getJSON(apiurl,function(json){
+	
+	//............................................................................
 		
 	$(window).load(function() {
 
-
+		// build the heat map
  	    var pointArray = new google.maps.MVCArray(heat_map_data_arr);
-
-		console.debug('window load: HeatMapData:  data array = ' + heat_map_data_arr);
-		console.debug('window load: PointData:  data array = ' + pointArray);
-
-
 		heatmap = new google.maps.visualization.HeatmapLayer({
     		data: pointArray
 		});
-
 		heatmap.setMap(map); 
-		heatmap.set('radius', heatmap.get('radius') ? null : 50); // 50 pixels
+		
+		// set the radius of affected pixels
+		heatmap.set('radius', heatmap.get('radius') ? null : 70); // 50 pixels
 
+		// set an alternate gradient of colors
  		var gradient = [
 		    'rgba(0, 255, 255, 0)',
 		    'rgba(0, 255, 255, 1)',
@@ -294,9 +265,14 @@ $(document).ready(function(){
 		    'rgba(255, 0, 0, 1)'
   		];
   		heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+ 		//heatmap.set('opacity', heatmap.get('opacity') ? null : 2);
 
+		// debugging
+		console.debug('num elements in heat map data array = ' + heat_map_data_arr.length);
+		console.debug('window load: HeatMapData:  data array = ' + heat_map_data_arr);
+		console.debug('window load: PointData:  data array = ' + pointArray);
 		
-	});		
+	});	// end $(window).load(function() {	
 		
 }); // end $(document).ready(function(){
 //#####################################################################################
