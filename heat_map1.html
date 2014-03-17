@@ -19,7 +19,7 @@ Date: 2014-02-01
     
  		<script src="js/jquery.min.js"></script>
 				
-		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
 
 		
 <script>
@@ -43,16 +43,29 @@ function initialize() {
 } // end function initialize() {
 
 google.maps.event.addDomListener(window, 'load', initialize);
-heatmapData = new Array;
+
+ 	     
+	
+
+
+
 
 
 </script>
 	<script>
 //#####################################################################################
+	
+
 count_per_year_arr = new Array();
 year_labels_arr = new Array();
 year_data_arr = new Array();
 year_arr_index = 0;
+   
+
+
+
+
+heat_map_data_arr = new Array();   
    
 count_per_month_arr = new Array();
 month_labels_arr = new Array();
@@ -79,7 +92,9 @@ apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&forma
 //..........................................................................    
 $(document).ready(function(){
     
-    
+	var myLatlng = new google.maps.LatLng(38.89808,-77.036523);
+	var mapOptions = { zoom: 2, center: myLatlng, mapTypeId: google.maps.MapTypeId.SATELLITE };// satillite view
+	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);    
 	 		
     // get the data from flickr
     // see how many pages of photos we have...
@@ -114,9 +129,7 @@ $(document).ready(function(){
 			} // end for(this_month = 1; this_month <= 12; this_month++)
 		} // end for (this_year = 2006; this_year <= 2014; this_year++)   
     	
-    	var myLatlng = new google.maps.LatLng(38.89808,-77.036523);
-		var mapOptions = { zoom: 2, center: myLatlng, mapTypeId: google.maps.MapTypeId.SATELLITE };// satillite view
-		map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
  	     
 	    //..................................................................
 	    // roll through the pages of photos...
@@ -184,12 +197,20 @@ $(document).ready(function(){
 					var lng = this_photo.longitude;
 				  	var myLatlng = new google.maps.LatLng(lat,lng);
 				  	
-				  	heatmapData[count-1] = myLatlng;  
-				  	//var heatmapData = [
- 	 				//	new google.maps.LatLng(37.782, -122.447),
-  					//	new google.maps.LatLng(37.782, -122.445),
+				  	heat_map_data_arr[count-1] = myLatlng;  
+				  	
+				  	//heat_map_data_arr[0] = new google.maps.LatLng(37.782551, -122.445368);  
+					//heat_map_data_arr[1] = new google.maps.LatLng(37.782745, -122.444586);
+					//heat_map_data_arr[2] = new google.maps.LatLng(37.783371, -122.439687); 
+					//heat_map_data_arr[3] = new google.maps.LatLng(37.783368, -122.439666); 
+				  	
+					//heat_map_data_arr = [  
+					//	new google.maps.LatLng(37.782551, -122.445368),
+					 // 	new google.maps.LatLng(37.782745, -122.444586),
+					//  	new google.maps.LatLng(37.783371, -122.439687),
+					//  	new google.maps.LatLng(37.783368, -122.439666),
 					//];
-
+					
 				  	//var thumbnail = 'http://farm'+ this_photo.farm + '.staticflickr.com/'+ this_photo.server+ '/'+this_photo.id+'_'+this_photo.secret+'_t.jpg';
 				  	// Format: http://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
 				  	
@@ -216,19 +237,70 @@ $(document).ready(function(){
 	     } // end for (var this_page=1;this_page<=num_photo_pages;this_page++)
 
 
-		console.debug('HeatMapData:  data array = ' + heatmapData);
+
+//heat_map_data_arr = [  
+//	new google.maps.LatLng(37.782551, -122.445368),
+//	new google.maps.LatLng(37.782745, -122.444586),
+//	new google.maps.LatLng(37.783371, -122.439687),
+//	new google.maps.LatLng(37.783368, -122.439666),
+//];
+			  	
+
+				  	
+		//heat_map_data_arr[0] = new google.maps.LatLng(37.782551, -122.445368);  
+		//heat_map_data_arr[1] = new google.maps.LatLng(37.782745, -122.444586);
+		//heat_map_data_arr[2] = new google.maps.LatLng(37.783371, -122.439687); 
+		//heat_map_data_arr[3] = new google.maps.LatLng(37.783368, -122.439666); 
+					
+		//console.debug('OUTSIDE HeatMapData:  data array = ' + heat_map_data_arr);
+		//console.debug('PointData:  data array = ' + pointArray);
 		
 		//..........................................................................
-		var heatmap = new google.maps.visualization.HeatmapLayer({
-  			data: heatmapData
-		});
-		heatmap.setMap(map); 	
+	
 
 
 	 }); // end $.getJSON(apiurl,function(json){
 		
+	$(window).load(function() {
+
+
+ 	    var pointArray = new google.maps.MVCArray(heat_map_data_arr);
+
+		console.debug('window load: HeatMapData:  data array = ' + heat_map_data_arr);
+		console.debug('window load: PointData:  data array = ' + pointArray);
+
+
+		heatmap = new google.maps.visualization.HeatmapLayer({
+    		data: pointArray
+		});
+
+		heatmap.setMap(map); 
+		heatmap.set('radius', heatmap.get('radius') ? null : 50); // 50 pixels
+
+ 		var gradient = [
+		    'rgba(0, 255, 255, 0)',
+		    'rgba(0, 255, 255, 1)',
+		    'rgba(0, 191, 255, 1)',
+		    'rgba(0, 127, 255, 1)',
+		    'rgba(0, 63, 255, 1)',
+		    'rgba(0, 0, 255, 1)',
+		    'rgba(0, 0, 223, 1)',
+		    'rgba(0, 0, 191, 1)',
+		    'rgba(0, 0, 159, 1)',
+		    'rgba(0, 0, 127, 1)',
+		    'rgba(63, 0, 91, 1)',
+		    'rgba(127, 0, 63, 1)',
+		    'rgba(191, 0, 31, 1)',
+		    'rgba(255, 0, 0, 1)'
+  		];
+  		heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+
+		
+	});		
+		
 }); // end $(document).ready(function(){
 //#####################################################################################
+
 		</script>
   	</head>
 
