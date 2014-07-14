@@ -141,12 +141,13 @@ $(document).ready(function(){
 						// increment the counter for the month and year this photo was taken     		
 						count_per_month_arr[month+''+year]++;   		
 	
+						
 		    			// only collect the daily data for january.
-		    			if ((year == 2009) && (month == 1))
-		    			{
+		    			//if ((year == 2009) && (month == 1))
+		    			//{
 							// increment the counter for the month and year this photo was taken     		
 							count_per_day_arr[day+''+month+''+year]++;   		
-						}
+						//}
 						
 						// calculate the progress bar percentage
 						var progress_bar = document.getElementById('progress-bar');
@@ -154,7 +155,7 @@ $(document).ready(function(){
 						progress_bar.style.width = percentage_loaded+'%';
 						
 						// show the ending total count
-		    			if (count >= (total_photos-50))
+		    			if (count >= (total_photos-100))
 		    			{
 		    				$("#status_message").html(''); // clear the status message
 							$("#flickr_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
@@ -196,8 +197,8 @@ $(document).ready(function(){
 	    		month_data_arr[month_arr_index] = count_per_month_arr[this_month+''+this_year];
 	    		   		    		
 	    		// only collect the data for january.
-	    		if ((this_year == 2009) && (this_month == 1))
-	    		{
+	    		//if ((this_year == 2009) && (this_month == 1))
+	    		//{
 	    			for(this_day = 1; this_day <= 31; this_day++)
 	    			{
 	    				// monthly labels...
@@ -210,7 +211,7 @@ $(document).ready(function(){
 	    				day_arr_index++;
 	    			} // end for(this_day = 1; this_day <= 31; this_day++)
 	    			  
-	    		} // end if ((year == 2009) && (month == 1))
+	    		//} // end if ((year == 2009) && (month == 1))
 	    		
 	    		// increment the monthly index
 	    		month_arr_index++;
