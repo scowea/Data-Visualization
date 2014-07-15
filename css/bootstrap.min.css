@@ -13,3 +13,4 @@ audio,canvas,progress,video{display:inline-block;vertical-align:baseline}audio:n
 
 .hide_scroll1 iframe { width:525px; height: 325px; overflow:auto; border:0; }
 .hide_scroll2 iframe { width:625px; height: 625px; overflow:auto; border:0; }
+.obama_hope_pic {float:left}
