@@ -1,26 +1,9 @@
-<!DOCTYPE html>
-<!-- 
-Author: Scott M Weaver
-Date: 2014-02-01	
--->
-<html>
- 	<head>
-  		<title>Data Visualization</title>
-  		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
- 
-    	<link rel="icon" type="image/x-icon" href="favicon.ico" />
-    	
-     	<link href="css/bootstrap.min.css" rel="stylesheet">
-    	<link href="css/jumbotron.css" rel="stylesheet">
-    
- 		<script src="js/jquery.min.js"></script>
-		<script src="highcharts/js/highcharts.js"></script>
-		
-		<script>
+/*!
+ * Scott M. Weaver
+ * Aug 22, 2014
+ */
 //#####################################################################################
+
 count_per_year_arr = new Array();
 year_labels_arr = new Array();
 year_data_arr = new Array();
@@ -256,7 +239,7 @@ $(document).ready(function(){
 	            data: year_data_arr 
 	        }]
 	    }); // end $('#yearly_chart').highcharts({
-		$('#yearly_chart').append('<hr>');
+		$('#yearly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub><hr>');
 		
 		//...............................................................................
 		$('#monthly_chart').highcharts({
@@ -279,10 +262,9 @@ $(document).ready(function(){
 	            data: month_data_arr 
 	        }]
 	    }); // end $('#monthly_chart').highcharts({
-		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
+		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub><hr>');
 		
 		//...............................................
-		/*
 		$('#january_2009_chart').highcharts({
 	       chart: {
 	            type: 'bar'
@@ -306,7 +288,7 @@ $(document).ready(function(){
 	        //turboThreshold : 0
 	    }); // end $('#january_2009_chart').highcharts({
 		$('#january_2009_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
-		*/	
+
 
 
 	 }); // end $.getJSON(apiurl,function(json){
@@ -317,68 +299,3 @@ $(document).ready(function(){
 	}); // end $(window).load(function() {
 	
 }); // end $(document).ready(function(){
-//#####################################################################################
-		</script>
-  	</head>
-
-	<body>
-  	
-    	<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-    		<div class="container">
-        		<div class="navbar-header">
-          			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            			<span class="sr-only">Toggle navigation</span>
-            			<span class="icon-bar"></span>
-            			<span class="icon-bar"></span>
-            			<span class="icon-bar"></span>
-          			</button>
-          
-          			<a class="navbar-brand" href="index.html">Data Visualization</a>
-        		</div><!--/.navbar-header -->
-        
-        		<div class="collapse navbar-collapse">
-          			<ul class="nav navbar-nav">
-          			<li><a href="index.html">Home</a></li>
-          			<li><a href="about.html">About</a></li>       
-          			</ul>
-        		</div><!--/.nav-collapse -->
-    		</div><!--/.container -->
-      
-		</div><!--/.navbar -->
-  	
-    	<div class="container">
-    	
-      		<br>	
-       		<p>
-       			<a class="btn btn-success btn-lg" role="button" href="index.html" >&laquo; Back to see more</a>
-       			  
-       		</p>
-      		
-			<div id="progress" class="progress">
-				<div id="progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div> 
-			</div>
-       		<div id="flickr_count"></div>
-     
-     		<div class="well"><p>
-     			<div id="status_message"></div>
-     			<div id="yearly_chart" style="height:100%; width:100%;"></div>
-     			<div id="monthly_chart" style="height:100%; width:100%;"></div>
-     			
-     		</p></div>
-     				
-   		
-      		<hr>
-
-      		<footer>
-        		<p>&copy; eWeaverSolutions 2014</p>
-      		</footer>
-      	
-        </div> <!-- /container -->
-  	
-    	<!-- Bootstrap core JavaScript
-    	================================================== -->
-    	<!-- Placed at the end of the document so the pages load faster -->
-  
-    	<script src="js/bootstrap.min.js"></script>
-	</body>
-</html>
