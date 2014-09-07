@@ -16,9 +16,10 @@ Date: 2014-02-01
     	<link href="css/jumbotron.css" rel="stylesheet">
     	<link href="css/googlemap.css" rel="stylesheet">
     
- 		<script src="js/jquery.min.js"></script>
+ 		
+ 		<script src="js/jquery.js"></script>
 				
-		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=visualization"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization"></script>
 
 		
 <script>
@@ -41,7 +42,7 @@ function initialize() {
 	
 } // end function initialize() {
 
-google.maps.event.addDomListener(window, 'load', initialize);
+
 
  	     
 	
@@ -78,7 +79,16 @@ day_arr_index = 0;
 
 count = 0;
 percentage_loaded = 0;
-apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken,geo&has_geo=1";
+google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
+apiurl = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/od6/public/values?alt=json";
+apiurl_html = "https://docs.google.com/spreadsheets/d/"+google_spreadsheet_id+"/pubhtml";
+apikey = "";
+
+
+var prev_infowindow = false;
+var prev_infowindow_animate = false;
+
+//apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken,geo&has_geo=1";
 //Key:dd4eb2f7ebff37400f01aae57493f41e
 //Secret:7a6541283f6e96bf
 //sort=date-posted-asc (the default value), date-posted-desc, date-taken-asc, date-taken-desc
@@ -91,9 +101,13 @@ apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&form
 //..........................................................................    
 $(document).ready(function(){
     
-	var myLatlng = new google.maps.LatLng(38.89808,-77.036523);
+	var myLatlng = new google.maps.LatLng(27.793756, -96.149808);//(38.89808,-77.036523);
 	var mapOptions = { zoom: 2, center: myLatlng, mapTypeId: google.maps.MapTypeId.SATELLITE };// satillite view
 	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);    
+	
+	var map_animateLatlng = new google.maps.LatLng(27.793756, -96.149808);//(38.89808,-77.036523);
+	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
+	map_animate = new google.maps.Map(document.getElementById("map-animate"), map_animateOptions);    
 	 		
     // get the data from flickr
     // see how many pages of photos we have...
@@ -102,10 +116,12 @@ $(document).ready(function(){
     	// show status messages...
     	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
     	$("#loading_progressbar").html(percentage_loaded); 
-	    $("#data_source").html("");
+	    $("#data_source").html("[<a target=_blank href="+apiurl+">Data Source</a>]");
+	    
+	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
 	    
 	    // total of all photos across all pages
-	    total_flickr_photos = json.photos.total;
+	    total_photos = json.feed.openSearch$totalResults.$t;
 	    
 		//.............................................................
 		// zero out the day/year/month counters
@@ -132,23 +148,29 @@ $(document).ready(function(){
  	     
 	    //..................................................................
 	    // roll through the pages of photos...
-	    for (var this_page=1;this_page<=json.photos.pages;this_page++)
-	    {
+	    //for (var this_page=1;this_page<=json.photos.pages;this_page++)
+	    //{
 	    	// get data for this page of photos
-	    	$.getJSON(apiurl+'&page='+this_page,function(json){
+	    //	$.getJSON(apiurl+'&page='+this_page,function(json){
 	    		
 	    		// get each photo info..
-	    		$.each(json.photos.photo,function(i,this_photo){
+	    		$.each(json.feed.entry,function(i,this_photo){
+					
+//					if ((this_photo.gsx$datetaken.$t !== '') && (this_photo.gsx$datetaken.$t.substr(0,2) !== '') && (this_photo.gsx$datetaken.$t.substr(3,2)) && (this_photo.gsx$datetaken.$t.substr(6,4)))
+//					{
+
 					
 					count++; // count each photo as we process it...
-					$("#flickr_data").append(count + ': '+ this_photo.datetaken+';'+this_photo.longitude+','+this_photo.latitude+'|');
-					$("#flickr_count").html('<p>Loading Photos From Flickr.com that have GEO Data and are tagged with "Hope" and "Obama": <b>'+count+'</b></p>');					
+					$("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
+					$("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');					
 					$("#status_message").html('<h2>One Moment Please...</h2>');
 					
 					// get the month and year of the date this photo was taken		
-					year = this_photo.datetaken.substr(0,4);
-					month = this_photo.datetaken.substr(5,2);
-					day = this_photo.datetaken.substr(8,2);
+					month = this_photo.gsx$datetaken.$t.substr(0,2);
+					day = this_photo.gsx$datetaken.$t.substr(3,2);
+					year = this_photo.gsx$datetaken.$t.substr(6,4);
+					
+					//console.debug('|'+year+'|');
 					
 					// strip leading zeros from the month or day
 					// EX: datetaken":"2013-11-05 13:28:40
@@ -159,94 +181,153 @@ $(document).ready(function(){
 					
 					// increment the counter for the year this photo was taken
 					count_per_year_arr[year]++; 
+					//console.debug(year +' counter'+count_per_year_arr[year]);
 					
 					// increment the counter for the month and year this photo was taken     		
 					count_per_month_arr[month+''+year]++;   		
 
 	    			// only collect the daily data for january.
-	    			if ((year == 2009) && (month == 1))
-	    			{
+	    			//if ((year == 2009) && (month == 1))
+	    			//{
 						// increment the counter for the month and year this photo was taken     		
-						count_per_day_arr[day+''+month+''+year]++;   		
-					}
+						count_per_day_arr[day+''+month+''+year]++;   	   		
+					//}
 					
+					/*
 					// calculate the progress bar percentage
 					var progress_bar = document.getElementById('progress-bar');
-					percentage_loaded = (count * 100)/total_flickr_photos;
+					percentage_loaded = (count * 100)/total_photos;
 					progress_bar.style.width = percentage_loaded+'%';
-					
+					progress_bar.style.visibility="hidden";
+					*/
 					// show the ending total count
-	    			if (count >= (total_flickr_photos-250))
+	    			if (count >= (total_photos-250))
 	    			{
 	    				$("#status_message").html(''); // clear the status message
-						$("#flickr_count").html('Photos Loaded From Flickr.com that have GEO Data and are tagged with "Hope" and "Obama": <b>'+total_flickr_photos+'</b> [<a target=_blank href='+apiurl+'>Data Source</a>]');
-						progress_bar.style.width = '100%';
+						$("#flickr_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
+						//progress_bar.style.width = '100%';
 						
 						// we are done so hide the progress bar
-						var progress_bar = document.getElementById('progress');
-						progress_bar.style.visibility="hidden";
-						//var progress_bar_container = document.getElementById('progress-bar');
-						//progress_bar_container.style.visibility="hidden";
+						//var progress_bar = document.getElementById('progress-bar');
+						//progress_bar.style.visibility="hidden";
 						
 					} // end if (count >= (total_flickr_photos-250))	  
 					
+					
+					
 					//.................
 					// in for loop:
-					var lat = this_photo.latitude;
-					var lng = this_photo.longitude;
-				  	var myLatlng = new google.maps.LatLng(lat,lng);	
-				  	heat_map_data_arr[count-1] = myLatlng;  
-				  					  					
-				  	var thumbnail = 'http://farm'+ this_photo.farm + '.staticflickr.com/'+ this_photo.server+ '/'+this_photo.id+'_'+this_photo.secret+'_t.jpg';
-				  	// Format: http://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
-				  	// this_photo.secret
-					// this_photo.farm
-					// this_photo.id
+					var lat = this_photo.gsx$latitude.$t; //this_photo.latitude; 
+					var lng = this_photo.gsx$longitude.$t; //this_photo.longitude;
 					
-				  	var marker = new google.maps.Marker({
-				    	position: myLatlng,
-				      	map: map,
-				    	title: jQuery.trim(this_photo.title),
-				     	visible: true,
-  						clickable: true,
-  						icon: './docs-assetts/small_dot.png'
-  					//	zIndex: count // puts the newest thumbnails on top of the stack
-  						//shadow: 'http://www.mysite.com/markershadow.png'
-					});
-					
-					var infowindow = new google.maps.InfoWindow({
-      					content: '<h3>'+this_photo.title+'</h3><img src="'+thumbnail+'" width=100% height=100% alt="'+this_photo.title+'" >'
-  					});
-
-  					google.maps.event.addListener(marker, 'click', function() {
-    					infowindow.open(map,marker);
-  					});
-  					
+					if ((lat != "") && (lng != ""))
+					{
+						
+						// geo code this address
+						//var geocode_url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + this_photo.gsx$address.$t + "&key=" + api_key;
+						//$.getJSON("https://maps.googleapis.com/maps/api/geocode/json?address=" . ,function(json){
+						//https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=API_KEY
+						
+					  	var myLatlng = new google.maps.LatLng(lat,lng);	
+					  	heat_map_data_arr[count-1] = myLatlng;  
+					  					  					
+					  	//var thumbnail = 'http://farm'+ this_photo.farm + '.staticflickr.com/'+ this_photo.server+ '/'+this_photo.id+'_'+this_photo.secret+'_t.jpg';
+					  	var thumbnail = this_photo.gsx$urltojpg.$t;
+					  	// Format: http://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+					  	// this_photo.secret
+						// this_photo.farm
+						// this_photo.id
+						
+					  	var marker = new google.maps.Marker({
+					    	position: myLatlng,
+					      	map: map,
+					    	title: jQuery.trim(this_photo.gsx$description.$t),
+					     	visible: true,
+	  						clickable: true,
+	  						icon: './docs-assetts/small_dot.png'
+	  					//	zIndex: count // puts the newest thumbnails on top of the stack
+	  						//shadow: 'http://www.mysite.com/markershadow.png'
+						});
+						
+						var marker_animate = new google.maps.Marker({
+					    	position: myLatlng,
+					      	map: map_animate,
+					    	title: jQuery.trim(this_photo.gsx$description.$t),
+					     	visible: true,
+	  						clickable: true,
+	  						icon: './docs-assetts/small_dot.png'
+	  					//	zIndex: count // puts the newest thumbnails on top of the stack
+	  						//shadow: 'http://www.mysite.com/markershadow.png'
+						});
+						
+						var infowindow_html = '<h3>'+this_photo.gsx$description.$t+'</h3>';
+						infowindow_html += '<img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br><br>';
+						infowindow_html += '<b>Date Taken:</b> '+ this_photo.gsx$datetaken.$t + '<br>';
+						infowindow_html += '<b>Address:</b> '+this_photo.gsx$address.$t + '<br>';
+						infowindow_html += '<b>Latitude:</b> '+this_photo.gsx$latitude.$t + '<br>';
+						infowindow_html += '<b>Longitude:</b> '+this_photo.gsx$longitude.$t + '<br>';
+						infowindow_html += '<b>Media:</b> '+this_photo.gsx$media.$t + '<br>';
+						infowindow_html += '<b>Genre:</b> '+this_photo.gsx$genre.$t + '<br>';
+						infowindow_html += '<b>Art Form:</b> '+this_photo.gsx$artform.$t + '<br>';
+						infowindow_html += '<b>Function:</b> '+this_photo.gsx$function.$t + '<br>';
+						infowindow_html += '<b>Obamicon?:</b> '+this_photo.gsx$isobamacon.$t + '<br>';
+						infowindow_html += '<b>Designer:</b> '+this_photo.gsx$designer.$t + '<br>';
+						infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
+						infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
+						
+						var infowindow = new google.maps.InfoWindow({
+	      					content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
+	  					});
+	
+						var infowindow_animate = new google.maps.InfoWindow({
+	      					content: infowindow_html 
+	  					});
+	  					
+	  					google.maps.event.addListener(marker, 'click', function() {
+	  						if (prev_infowindow) { prev_infowindow.close();} // close any other infowindows that happen to be open
+	  						prev_infowindow = infowindow;
+	  						
+	    					infowindow.open(map,marker);
+	  					});
+	  					
+	  					google.maps.event.addListener(marker_animate, 'click', function() {
+	  						if (prev_infowindow_animate) { prev_infowindow_animate.close();} // close any other infowindows that happen to be open
+	  						prev_infowindow_animate = infowindow_animate;
+	  						
+	  						//var infowindow_animate = new google.maps.InfoWindow({
+	      					//	content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
+	  						//});
+	    					infowindow_animate.open(map_animate,marker_animate);
+	  					});
+  					}
 					//............................
 										
 				}); // end $.each(json.photos.photo,function(i,myresult){
 					
 	    	}); // end $.getJSON(apiurl,function(json){    
 	    		
-	     } // end for (var this_page=1;this_page<=num_photo_pages;this_page++)
+	 //    } // end for (var this_page=1;this_page<=num_photo_pages;this_page++)
 	
-	 }); // end $.getJSON(apiurl,function(json){
+	 //}); // end $.getJSON(apiurl,function(json){
 	
 	//............................................................................
 		
-	$(window).load(function() {
+	//$(window).load(function() {
 
 		// build the heat map
  	    var pointArray = new google.maps.MVCArray(heat_map_data_arr);
 		heatmap = new google.maps.visualization.HeatmapLayer({
     		data: pointArray
 		});
-		heatmap.setMap(map); 
 		
+		//heatmap.setMap(map); 
+		
+		heatmap.setMap(heatmap.getMap() ? null : map);
 		// set the radius of affected pixels
-		heatmap.set('radius', heatmap.get('radius') ? null : 70); // 50 pixels
+		//heatmap.set('radius', heatmap.get('radius') ? null : 20); // 50 pixels
 
 		// set an alternate gradient of colors
+ 		/*
  		var gradient = [
 		    'rgba(0, 255, 255, 0)',
 		    'rgba(0, 255, 255, 1)',
@@ -264,6 +345,7 @@ $(document).ready(function(){
 		    'rgba(255, 0, 0, 1)'
   		];
   		heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+ 		*/
  		//heatmap.set('opacity', heatmap.get('opacity') ? null : 2);
 
 		// debugging
@@ -271,10 +353,55 @@ $(document).ready(function(){
 		console.debug('window load: HeatMapData:  data array = ' + heat_map_data_arr);
 		console.debug('window load: PointData:  data array = ' + pointArray);
 		
-	});	// end $(window).load(function() {	
+	//});	// end $(window).load(function() {	
+		
+
+
+
+	google.maps.event.addDomListener(window, 'load', initialize);
+	
 		
 }); // end $(document).ready(function(){
+	
+	function toggleHeatmap() {
+  		heatmap.setMap(heatmap.getMap() ? null : map);
+	}	
+	
+	function changeGradient() {
+  var gradient = [
+    'rgba(0, 255, 255, 0)',
+    'rgba(0, 255, 255, 1)',
+    'rgba(0, 191, 255, 1)',
+    'rgba(0, 127, 255, 1)',
+    'rgba(0, 63, 255, 1)',
+    'rgba(0, 0, 255, 1)',
+    'rgba(0, 0, 223, 1)',
+    'rgba(0, 0, 191, 1)',
+    'rgba(0, 0, 159, 1)',
+    'rgba(0, 0, 127, 1)',
+    'rgba(63, 0, 91, 1)',
+    'rgba(127, 0, 63, 1)',
+    'rgba(191, 0, 31, 1)',
+    'rgba(255, 0, 0, 1)'
+  ]
+  heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+}
+
+function changeRadius() {
+  heatmap.set('radius', heatmap.get('radius') ? null : 20);
+}
+
+function start_timer() {
+	
+}
+
+function stop_timer() {
+	
+	
+}
+
 //#####################################################################################
+
 
 		</script>
 			
@@ -328,18 +455,23 @@ $(document).ready(function(){
 			
 			<p>The first is a heat map, showing where and when the image showed up across the world.  You can zoom in on cities such as Log Angeles where many sightings of the image were documented.</p>
 			
-			<div id="progress" class="progress">
-				<div id="progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div> 
-			</div>
-  			<div id="map-canvas"></div>
+			<div id="flickr_count"></div><br>
+			<button onclick="toggleHeatmap()">Toggle Heatmap</button>
+			<button onclick="changeGradient()">Change gradient</button>
+            <button onclick="changeRadius()">Change radius</button>
+
+  			<div id="map-canvas" width="100%" height="500px"></div>
   			  
        		<hr />
        		<p> To get idea of how the obama hope image circulated, although this story can’t be told, I entered in chronological dates where image showed up on heat map. Viewers can click on “Start” and see how it moved.</p>
-			<i>[PLACE HOLDER...]</i>
-			<hr />
-			<p>A third related map shows the rates of uptake to see how the frequency of uptake has accelerated and decelerated.</p>
-       		<i>[working on embedding it on this page. it is currently located <a href=obamicon_frequency_chart.html>here</a>]</i>
-       						
+			
+			
+			<button onclick="start_timer()" disabled>Start</button>
+			<button onclick="stop_timer()" disabled>Stop</button>
+			<button onclick="reset_timer()" disabled>Reset</button>
+			<br><b>Current Date/Time In Timelapse: <font color=blue>01/01/2008 12:30PM</font></b><br>
+			<div id="map-animate" width="100%" height="500px"></div>
+					
 		
   				<hr />		
 			<p>
