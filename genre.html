@@ -55,56 +55,55 @@ function initialize() {
 	<script>
 //#####################################################################################
 	
+var gmarkers = [];	
+	
 $(document).ready(function(){
 	
-count_per_year_arr = new Array();
-year_labels_arr = new Array();
-year_data_arr = new Array();
-year_arr_index = 0;
-   
-
-
-cat_arr = new Array();
-cat_counter = 0;
-
-
-heat_map_data_arr = new Array();   
-   
-count_per_month_arr = new Array();
-month_labels_arr = new Array();
-month_data_arr = new Array();
-month_arr_index = 0;
-
-count_per_day_arr = new Array();
-day_labels_arr = new Array();
-day_data_arr = new Array();
-day_arr_index = 0;
-
-count = 0;
-percentage_loaded = 0;
-google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
-apiurl = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/od6/public/values?alt=json";
-apiurl_html = "https://docs.google.com/spreadsheets/d/"+google_spreadsheet_id+"/pubhtml";
-apikey = "";
-
-
-var prev_infowindow = false;
-var prev_infowindow_animate = false;
-
-//apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken,geo&has_geo=1";
-//Key:dd4eb2f7ebff37400f01aae57493f41e
-//Secret:7a6541283f6e96bf
-//sort=date-posted-asc (the default value), date-posted-desc, date-taken-asc, date-taken-desc
-//Important Dates:
-//   Obama elected: 2008-11-4 (november 4, 2008)
-
-// &has_geo=1 
-// &sort=date-taken-asc
- 
-//..........................................................................    
-//$(document).ready(function(){
-    
-    var gmarkers = [];
+	count_per_year_arr = new Array();
+	year_labels_arr = new Array();
+	year_data_arr = new Array();
+	year_arr_index = 0;
+	   
+	
+	
+	cat_arr = new Array();
+	cat_counter = 0;
+	
+	
+	heat_map_data_arr = new Array();   
+	   
+	count_per_month_arr = new Array();
+	month_labels_arr = new Array();
+	month_data_arr = new Array();
+	month_arr_index = 0;
+	
+	count_per_day_arr = new Array();
+	day_labels_arr = new Array();
+	day_data_arr = new Array();
+	day_arr_index = 0;
+	
+	count = 0;
+	percentage_loaded = 0;
+	google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
+	apiurl = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/od6/public/values?alt=json";
+	apiurl_html = "https://docs.google.com/spreadsheets/d/"+google_spreadsheet_id+"/pubhtml";
+	apikey = "";
+	
+	
+	var prev_infowindow = false;
+	var prev_infowindow_animate = false;
+	
+	//apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken,geo&has_geo=1";
+	//Key:dd4eb2f7ebff37400f01aae57493f41e
+	//Secret:7a6541283f6e96bf
+	//sort=date-posted-asc (the default value), date-posted-desc, date-taken-asc, date-taken-desc
+	//Important Dates:
+	//   Obama elected: 2008-11-4 (november 4, 2008)
+	
+	// &has_geo=1 
+	// &sort=date-taken-asc
+	 
+	//..........................................................................        
     
 	var map_animateLatlng = new google.maps.LatLng(35.232471, 9.319066);//(38.89808,-77.036523);
 	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
@@ -311,41 +310,39 @@ var prev_infowindow_animate = false;
 	
 	 //}); // end $.getJSON(apiurl,function(json){
 	
-	//............................................................................
+		//............................................................................	
+		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<u>Show/Hide Genres:</u><br>');
+		 	
+		// if this genre is not already in the array of genres, then create the checkbox 
+		for (i = 1; i <= cat_counter; i++)
+		{	
+			// get each genre type
+			this_cat = cat_arr[i]; 
 		
-	// if this genre is not already in the array of genres, then create the checkbox 
-	for (i = 1; i <= cat_counter; i++)
-	{	
+			// create the html for the checkbox
+			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label><input type="checkbox" onclick="boxclick(this, ' + "'" + 'genre'+ "'" +','+ "'" + this_cat + "'" +','+ "'" + gmarkers + "'" +  ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
 		
-		// get each genre type
-		this_cat = cat_arr[i]; 
-	
-		// create the html for the checkbox
-		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label><input type="checkbox" onclick="boxclick(this, ' + "'" + 'genre'+ "'" +','+ "'" + this_cat + "'" +','+ "'" + gmarkers + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
-	
-	}
-			
-}); // end $.getJSON(apiurl,function(json){   
+		} // end for (i = 1; i <= cat_counter; i++)
+				
+	}); // end $.getJSON(apiurl,function(json){   
 
 
 	google.maps.event.addDomListener(window, 'load', initialize);
 	
-	
-		
-		
-		
-	
-	function boxclick(box,category, id, gmarkers) {
-        if (box.checked) {
-          show(category, id, gmarkers);
+}); // end $(document).ready(function(){
 
-        } else {
-          hide(category, id, gmarkers);
-        }
-      }
+
+
+function boxclick(box,category, id, gmarkers_x) {
+	
+	if (box.checked) {
+    	show(category, id, gmarkers_x);
+    } else {
+    	hide(category, id, gmarkers_x);
+    }
+}      
       
-      
-function show(category, id, gmarkers) {
+function show(category, id, gmarkers_x) {
 	
 	var num_markers = gmarkers.length;
 	
@@ -358,7 +355,7 @@ function show(category, id, gmarkers) {
     document.getElementById(id).checked = true;
 }            	
       	
-function hide(category, id, gmarkers) {
+function hide(category, id, gmarkers_x) {
 
 	var num_markers = gmarkers.length;
 
@@ -370,8 +367,6 @@ function hide(category, id, gmarkers) {
    	// == check the checkbox ==
    	document.getElementById(id).checked = false;
 }		
-
-}); // end $(document).ready(function(){
  
 //#####################################################################################
 
@@ -424,6 +419,7 @@ The first genre map is an Obamicon map. Obamicons are this. Structured in the st
      		<div id="flickr_count"></div>
   			<div id="map-and-checkboxes-container">
   				<div id="genre-map" ></div>
+  				
   			   	<div id="genre-checkboxes"></div>
   			</div>   	
 			<br>
