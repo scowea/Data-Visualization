@@ -284,20 +284,19 @@ var prev_infowindow_animate = false;
 	  						//});
 	    					infowindow_animate.open(map_animate,marker_animate);
 	    					
-	    					// push this marker into a array representing the group of markers
-	    					gmarkers.push(marker_animate);
+	    					
 	  					});
 	  					
+	  					// push this marker into a array representing the group of markers
+	    				gmarkers.push(marker_animate);
 	  					
+	  					// if this genre is not already in the array of genres, then create the checkbox 
 	  					if (jQuery.inArray(this_photo.gsx$genre.$t, cat_arr) === -1)
 	  					{
 	  						cat_counter++;
 	  						
 	  						// load the array so we know we already created this checkbox the next loop iteration
 	  						cat_arr[cat_counter] = this_photo.gsx$genre.$t;
-	  					
-	  						// create the html for the checkbox
-	  						$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label><input type="checkbox" onclick="boxclick(this, ' + "'" + 'genre'+ "'" +','+ "'" + this_photo.gsx$genre.$t + "'" + ')"  checked=checked  id="' + this_photo.gsx$genre.$t + '"  /> '+this_photo.gsx$genre.$t+' </label><br>');
 	  					
 	  					}  
 	  						
@@ -306,7 +305,7 @@ var prev_infowindow_animate = false;
 										
 				}); // end $.each(json.photos.photo,function(i,myresult){
 					
-	    	}); // end $.getJSON(apiurl,function(json){    
+	    	 
 	    		
 	 //    } // end for (var this_page=1;this_page<=num_photo_pages;this_page++)
 	
@@ -314,8 +313,19 @@ var prev_infowindow_animate = false;
 	
 	//............................................................................
 		
+	// if this genre is not already in the array of genres, then create the checkbox 
+	for (i = 1; i <= cat_counter; i++)
+	{	
+		
+		// get each genre type
+		this_cat = cat_arr[i]; 
+	
+		// create the html for the checkbox
+		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label><input type="checkbox" onclick="boxclick(this, ' + "'" + 'genre'+ "'" +','+ "'" + this_cat + "'" +','+ "'" + gmarkers + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
+	
+	}
 			
-
+}); // end $.getJSON(apiurl,function(json){   
 
 
 	google.maps.event.addDomListener(window, 'load', initialize);
@@ -324,20 +334,22 @@ var prev_infowindow_animate = false;
 		
 		
 		
-}); // end $(document).ready(function(){
 	
-	function boxclick(box,category, id) {
+	function boxclick(box,category, id, gmarkers) {
         if (box.checked) {
-          show(category, id);
+          show(category, id, gmarkers);
 
         } else {
-          hide(category, id);
+          hide(category, id, gmarkers);
         }
       }
       
       
-function show(category, id) {
-	for (var i=0; i<gmarkers.length; i++) {
+function show(category, id, gmarkers) {
+	
+	var num_markers = gmarkers.length;
+	
+	for (var i=1; i<gmarkers.length; i++) {
      	if (gmarkers[i].genre == id) {
             gmarkers[i].setVisible(true);
         }
@@ -346,8 +358,11 @@ function show(category, id) {
     document.getElementById(id).checked = true;
 }            	
       	
-function hide(category, id) {
-	for (var i=0; i<gmarkers.length; i++) {
+function hide(category, id, gmarkers) {
+
+	var num_markers = gmarkers.length;
+
+	for (var i=1; i<gmarkers.length; i++) {
     	if (gmarkers[i].genre == id) {
         	gmarkers[i].setVisible(false);
      	}
@@ -355,6 +370,8 @@ function hide(category, id) {
    	// == check the checkbox ==
    	document.getElementById(id).checked = false;
 }		
+
+}); // end $(document).ready(function(){
  
 //#####################################################################################
 
