@@ -56,7 +56,10 @@ function initialize() {
 //#####################################################################################
 	
 var gmarkers = [];	
-	
+var marker_colors = ['FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','dc143c'];
+var color_arr = [];
+var lat_lng_counter = 0;
+
 $(document).ready(function(){
 	
 	count_per_year_arr = new Array();
@@ -69,6 +72,7 @@ $(document).ready(function(){
 	cat_arr = new Array();
 	cat_counter = 0;
 	
+
 	
 	heat_map_data_arr = new Array();   
 	   
@@ -108,11 +112,8 @@ $(document).ready(function(){
 	var map_animateLatlng = new google.maps.LatLng(35.232471, 9.319066);//(38.89808,-77.036523);
 	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
 	map_animate = new google.maps.Map(document.getElementById("genre-map"), map_animateOptions);    
-	  
-
-	 		
-    // get the data from flickr
-    // see how many pages of photos we have...
+	  	
+    // get the data from the google spreadsheet
     $.getJSON(apiurl,function(json){
     	
     	// show status messages...
@@ -144,171 +145,158 @@ $(document).ready(function(){
 					} // end for(this_day = 1; this_day <= 12; this_day++)   						   		
 				} // end if ((this_year == 2009) && (this_month == 1))				   						   		
 			} // end for(this_month = 1; this_month <= 12; this_month++)
-		} // end for (this_year = 2006; this_year <= 2014; this_year++)   
-    	
+		} // end for (this_year = 2006; this_year <= 2014; this_year++)     
+	      		
+		// get each photo info..
+		$.each(json.feed.entry,function(i,this_photo){
+			
+			count++; // count each photo as we process it...
+			$("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
+			$("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');					
+			$("#status_message").html('<h2>One Moment Please...</h2>');
+			
+			// get the month and year of the date this photo was taken		
+			month = this_photo.gsx$datetaken.$t.substr(0,2);
+			day = this_photo.gsx$datetaken.$t.substr(3,2);
+			year = this_photo.gsx$datetaken.$t.substr(6,4);
+			
+			//console.debug('|'+year+'|');
+			
+			// strip leading zeros from the month or day
+			// EX: datetaken":"2013-11-05 13:28:40
+			if (month.substr(0,1) === '0')
+				month = month.substr(1,1);
+			if (day.substr(0,1) === '0')
+				day = day.substr(1,1);		
+			
+			// increment the counter for the year this photo was taken
+			count_per_year_arr[year]++; 
+			//console.debug(year +' counter'+count_per_year_arr[year]);
+			
+			// increment the counter for the month and year this photo was taken     		
+			count_per_month_arr[month+''+year]++;   		
 
- 	     
-	    //..................................................................
-	    // roll through the pages of photos...
-	    //for (var this_page=1;this_page<=json.photos.pages;this_page++)
-	    //{
-	    	// get data for this page of photos
-	    //	$.getJSON(apiurl+'&page='+this_page,function(json){
-	    		
-	    		// get each photo info..
-	    		$.each(json.feed.entry,function(i,this_photo){
-					
-//					if ((this_photo.gsx$datetaken.$t !== '') && (this_photo.gsx$datetaken.$t.substr(0,2) !== '') && (this_photo.gsx$datetaken.$t.substr(3,2)) && (this_photo.gsx$datetaken.$t.substr(6,4)))
-//					{
+			// only collect the daily data for january.
+			//if ((year == 2009) && (month == 1))
+			//{
+				// increment the counter for the month and year this photo was taken     		
+				count_per_day_arr[day+''+month+''+year]++;   	   		
+			//}
+			
+			/*
+			// calculate the progress bar percentage
+			var progress_bar = document.getElementById('progress-bar');
+			percentage_loaded = (count * 100)/total_photos;
+			progress_bar.style.width = percentage_loaded+'%';
+			progress_bar.style.visibility="hidden";
+			*/
+			// show the ending total count
+			if (count >= (total_photos-250))
+			{
+				$("#status_message").html(''); // clear the status message
+				$("#flickr_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
+				//progress_bar.style.width = '100%';
+				
+				// we are done so hide the progress bar
+				//var progress_bar = document.getElementById('progress-bar');
+				//progress_bar.style.visibility="hidden";
+				
+			} // end if (count >= (total_flickr_photos-250))	  
+			
+			
+			
+			//.................
+			// in for loop:
+			var lat = this_photo.gsx$latitude.$t; //this_photo.latitude; 
+			var lng = this_photo.gsx$longitude.$t; //this_photo.longitude;
+			
+			if ((lat != "") && (lng != ""))
+			{
+				
+				// geo code this address
+				//var geocode_url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + this_photo.gsx$address.$t + "&key=" + api_key;
+				//$.getJSON("https://maps.googleapis.com/maps/api/geocode/json?address=" . ,function(json){
+				//https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=API_KEY
+				
+			  	var myLatlng = new google.maps.LatLng(lat,lng);	
+			  					  					
+			  	//var thumbnail = 'http://farm'+ this_photo.farm + '.staticflickr.com/'+ this_photo.server+ '/'+this_photo.id+'_'+this_photo.secret+'_t.jpg';
+			  	var thumbnail = this_photo.gsx$urltojpg.$t;
+			  	// Format: http://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+			  	// this_photo.secret
+				// this_photo.farm
+				// this_photo.id
 
+				// if this genre is not already in the array of genres, then create the checkbox 
+				if (jQuery.inArray(this_photo.gsx$genre.$t, cat_arr) === -1)
+				{
+					cat_counter++;
 					
-					count++; // count each photo as we process it...
-					$("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
-					$("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');					
-					$("#status_message").html('<h2>One Moment Please...</h2>');
+					// load the array so we know we already created this checkbox the next loop iteration
+					cat_arr[cat_counter] = this_photo.gsx$genre.$t;
+					color_arr["'" + this_photo.gsx$genre.$t + "'"] = marker_colors[cat_counter];
+				
+				}  				
+			  		
+				var marker_animate = new google.maps.Marker({							
+			    	position: myLatlng,
+			      	map: map_animate,
+			    	title: jQuery.trim(this_photo.gsx$description.$t),
+			     	visible: true,
+					clickable: true,
+					icon: 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_photo.gsx$genre.$t + "'"]
+					//icon: './docs-assetts/small_dot.png'
 					
-					// get the month and year of the date this photo was taken		
-					month = this_photo.gsx$datetaken.$t.substr(0,2);
-					day = this_photo.gsx$datetaken.$t.substr(3,2);
-					year = this_photo.gsx$datetaken.$t.substr(6,4);
+					//shadow: 'http://www.mysite.com/markershadow.png'
+				});
+				
+				marker_animate.genre = this_photo.gsx$genre.$t;
+				marker_animate.category = 'genre';
+				
+				var infowindow_html = '<h3>'+this_photo.gsx$description.$t+'</h3>';
+				infowindow_html += '<img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br><br>';
+				infowindow_html += '<b>Date Taken:</b> '+ this_photo.gsx$datetaken.$t + '<br>';
+				infowindow_html += '<b>Address:</b> '+this_photo.gsx$address.$t + '<br>';
+				infowindow_html += '<b>Latitude:</b> '+this_photo.gsx$latitude.$t + '<br>';
+				infowindow_html += '<b>Longitude:</b> '+this_photo.gsx$longitude.$t + '<br>';
+				infowindow_html += '<b>Media:</b> '+this_photo.gsx$media.$t + '<br>';
+				infowindow_html += '<b>Genre:</b> '+this_photo.gsx$genre.$t + '<br>';
+				infowindow_html += '<b>Art Form:</b> '+this_photo.gsx$artform.$t + '<br>';
+				infowindow_html += '<b>Function:</b> '+this_photo.gsx$function.$t + '<br>';
+				infowindow_html += '<b>Obamicon?:</b> '+this_photo.gsx$isobamacon.$t + '<br>';
+				infowindow_html += '<b>Designer:</b> '+this_photo.gsx$designer.$t + '<br>';
+				infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
+				infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
+				
 					
-					//console.debug('|'+year+'|');
+				var infowindow_animate = new google.maps.InfoWindow({
+  					content: infowindow_html 
+				});
+				
 					
-					// strip leading zeros from the month or day
-					// EX: datetaken":"2013-11-05 13:28:40
-					if (month.substr(0,1) === '0')
-						month = month.substr(1,1);
-					if (day.substr(0,1) === '0')
-						day = day.substr(1,1);		
+				google.maps.event.addListener(marker_animate, 'click', function() {
+					if (prev_infowindow_animate) { prev_infowindow_animate.close();} // close any other infowindows that happen to be open
+					prev_infowindow_animate = infowindow_animate;
 					
-					// increment the counter for the year this photo was taken
-					count_per_year_arr[year]++; 
-					//console.debug(year +' counter'+count_per_year_arr[year]);
+					//var infowindow_animate = new google.maps.InfoWindow({
+  					//	content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
+					//});
+					infowindow_animate.open(map_animate,marker_animate);
 					
-					// increment the counter for the month and year this photo was taken     		
-					count_per_month_arr[month+''+year]++;   		
+					
+				});
+				
+				// push this marker into a array representing the group of markers
+				gmarkers.push(marker_animate);
+				lat_lng_counter++;
 
-	    			// only collect the daily data for january.
-	    			//if ((year == 2009) && (month == 1))
-	    			//{
-						// increment the counter for the month and year this photo was taken     		
-						count_per_day_arr[day+''+month+''+year]++;   	   		
-					//}
+				$("#num_plotted_images").html('Photos With Coordinates: <b>' + lat_lng_counter + '</b>');	
+			}
+			//............................
+								
+		}); // end $.each(json.photos.photo,function(i,myresult){
 					
-					/*
-					// calculate the progress bar percentage
-					var progress_bar = document.getElementById('progress-bar');
-					percentage_loaded = (count * 100)/total_photos;
-					progress_bar.style.width = percentage_loaded+'%';
-					progress_bar.style.visibility="hidden";
-					*/
-					// show the ending total count
-	    			if (count >= (total_photos-250))
-	    			{
-	    				$("#status_message").html(''); // clear the status message
-						$("#flickr_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
-						//progress_bar.style.width = '100%';
-						
-						// we are done so hide the progress bar
-						//var progress_bar = document.getElementById('progress-bar');
-						//progress_bar.style.visibility="hidden";
-						
-					} // end if (count >= (total_flickr_photos-250))	  
-					
-					
-					
-					//.................
-					// in for loop:
-					var lat = this_photo.gsx$latitude.$t; //this_photo.latitude; 
-					var lng = this_photo.gsx$longitude.$t; //this_photo.longitude;
-					
-					if ((lat != "") && (lng != ""))
-					{
-						
-						// geo code this address
-						//var geocode_url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + this_photo.gsx$address.$t + "&key=" + api_key;
-						//$.getJSON("https://maps.googleapis.com/maps/api/geocode/json?address=" . ,function(json){
-						//https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=API_KEY
-						
-					  	var myLatlng = new google.maps.LatLng(lat,lng);	
-					  					  					
-					  	//var thumbnail = 'http://farm'+ this_photo.farm + '.staticflickr.com/'+ this_photo.server+ '/'+this_photo.id+'_'+this_photo.secret+'_t.jpg';
-					  	var thumbnail = this_photo.gsx$urltojpg.$t;
-					  	// Format: http://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
-					  	// this_photo.secret
-						// this_photo.farm
-						// this_photo.id
-						
-					  		
-						var marker_animate = new google.maps.Marker({							
-					    	position: myLatlng,
-					      	map: map_animate,
-					    	title: jQuery.trim(this_photo.gsx$description.$t),
-					     	visible: true,
-	  						clickable: true,
-	  						icon: './docs-assetts/small_dot.png'
-	  					//	zIndex: count // puts the newest thumbnails on top of the stack
-	  						//shadow: 'http://www.mysite.com/markershadow.png'
-						});
-						
-						marker_animate.genre = this_photo.gsx$genre.$t;
-						
-						var infowindow_html = '<h3>'+this_photo.gsx$description.$t+'</h3>';
-						infowindow_html += '<img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br><br>';
-						infowindow_html += '<b>Date Taken:</b> '+ this_photo.gsx$datetaken.$t + '<br>';
-						infowindow_html += '<b>Address:</b> '+this_photo.gsx$address.$t + '<br>';
-						infowindow_html += '<b>Latitude:</b> '+this_photo.gsx$latitude.$t + '<br>';
-						infowindow_html += '<b>Longitude:</b> '+this_photo.gsx$longitude.$t + '<br>';
-						infowindow_html += '<b>Media:</b> '+this_photo.gsx$media.$t + '<br>';
-						infowindow_html += '<b>Genre:</b> '+this_photo.gsx$genre.$t + '<br>';
-						infowindow_html += '<b>Art Form:</b> '+this_photo.gsx$artform.$t + '<br>';
-						infowindow_html += '<b>Function:</b> '+this_photo.gsx$function.$t + '<br>';
-						infowindow_html += '<b>Obamicon?:</b> '+this_photo.gsx$isobamacon.$t + '<br>';
-						infowindow_html += '<b>Designer:</b> '+this_photo.gsx$designer.$t + '<br>';
-						infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
-						infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
-						
-							
-						var infowindow_animate = new google.maps.InfoWindow({
-	      					content: infowindow_html 
-	  					});
-	  					
-	  						
-	  					google.maps.event.addListener(marker_animate, 'click', function() {
-	  						if (prev_infowindow_animate) { prev_infowindow_animate.close();} // close any other infowindows that happen to be open
-	  						prev_infowindow_animate = infowindow_animate;
-	  						
-	  						//var infowindow_animate = new google.maps.InfoWindow({
-	      					//	content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
-	  						//});
-	    					infowindow_animate.open(map_animate,marker_animate);
-	    					
-	    					
-	  					});
-	  					
-	  					// push this marker into a array representing the group of markers
-	    				gmarkers.push(marker_animate);
-	  					
-	  					// if this genre is not already in the array of genres, then create the checkbox 
-	  					if (jQuery.inArray(this_photo.gsx$genre.$t, cat_arr) === -1)
-	  					{
-	  						cat_counter++;
-	  						
-	  						// load the array so we know we already created this checkbox the next loop iteration
-	  						cat_arr[cat_counter] = this_photo.gsx$genre.$t;
-	  					
-	  					}  
-	  						
-  					}
-					//............................
-										
-				}); // end $.each(json.photos.photo,function(i,myresult){
-					
-	    	 
-	    		
-	 //    } // end for (var this_page=1;this_page<=num_photo_pages;this_page++)
-	
-	 //}); // end $.getJSON(apiurl,function(json){
+	    	 	    		
 	
 		//............................................................................	
 		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<u>Show/Hide Genres:</u><br>');
@@ -319,8 +307,10 @@ $(document).ready(function(){
 			// get each genre type
 			this_cat = cat_arr[i]; 
 		
+			image_loc = 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_cat + "'"];
+			image_html = '<image src="'+ image_loc+'">';
 			// create the html for the checkbox
-			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label><input type="checkbox" onclick="boxclick(this, ' + "'" + 'genre'+ "'" +','+ "'" + this_cat + "'" +','+ "'" + gmarkers + "'" +  ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
+			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+' <input type="checkbox" onclick="boxclick(this, ' + "'" + 'genre'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
 		
 		} // end for (i = 1; i <= cat_counter; i++)
 				
@@ -333,20 +323,18 @@ $(document).ready(function(){
 
 
 
-function boxclick(box,category, id, gmarkers_x) {
+function boxclick(box,category, id) {
 	
 	if (box.checked) {
-    	show(category, id, gmarkers_x);
+    	show(category, id);
     } else {
-    	hide(category, id, gmarkers_x);
+    	hide(category, id);
     }
 }      
       
-function show(category, id, gmarkers_x) {
+function show(category, id) {
 	
-	var num_markers = gmarkers.length;
-	
-	for (var i=1; i<gmarkers.length; i++) {
+	for (var i=0; i<gmarkers.length; i++) {
      	if (gmarkers[i].genre == id) {
             gmarkers[i].setVisible(true);
         }
@@ -355,11 +343,9 @@ function show(category, id, gmarkers_x) {
     document.getElementById(id).checked = true;
 }            	
       	
-function hide(category, id, gmarkers_x) {
+function hide(category, id) {
 
-	var num_markers = gmarkers.length;
-
-	for (var i=1; i<gmarkers.length; i++) {
+	for (var i=0; i<gmarkers.length; i++) {
     	if (gmarkers[i].genre == id) {
         	gmarkers[i].setVisible(false);
      	}
@@ -367,7 +353,44 @@ function hide(category, id, gmarkers_x) {
    	// == check the checkbox ==
    	document.getElementById(id).checked = false;
 }		
- 
+
+function show_all() {
+
+	var category = 'genre';
+	
+	for (var i=0; i<gmarkers.length; i++) {
+     	if (gmarkers[i].category == category) {
+            gmarkers[i].setVisible(true);
+        }
+	}
+  	// == check all checkboxes ==
+  	//$('#genre-checkboxes input[type=checkbox]').prop('checked');
+  	$('#genre-checkboxes input[type=checkbox]').each(function() 
+	{ 
+        this.checked = true; 
+	});
+	
+	$('#show_hide_button').html('Hide All'); 
+	$('#show_hide_button').removeAttr('onclick');
+  	$('#show_hide_button').attr('onclick','hide_all()');
+}
+
+function hide_all() {
+
+	var category = 'genre';
+	
+	for (var i=0; i<gmarkers.length; i++) {
+    	if (gmarkers[i].category == category) {
+        	gmarkers[i].setVisible(false);
+     	}
+   	}
+   	// == uncheck all checkboxes ==
+  	$('#genre-checkboxes input[type=checkbox]').removeAttr('checked');
+  	
+  	$('#show_hide_button').removeAttr('onclick');
+  	$('#show_hide_button').attr('onclick','show_all()');
+  	$('#show_hide_button').html('Show All');
+} 
 //#####################################################################################
 
 
@@ -417,10 +440,10 @@ function hide(category, id, gmarkers_x) {
 The first genre map is an Obamicon map. Obamicons are this. Structured in the style of Obama Hope, viewers can click on the different pixels to see all the different Obamicons that have been created. Links to those images are also available.
 </p>
      		<div id="flickr_count"></div>
+     		<div id="num_plotted_images"></div>
   			<div id="map-and-checkboxes-container">
   				<div id="genre-map" ></div>
-  				
-  			   	<div id="genre-checkboxes"></div>
+  			   	<div id="genre-checkboxes"> <button id='show_hide_button' onclick="hide_all()">Hide All</button></div>
   			</div>   	
 			<br>
   			<hr />
@@ -431,7 +454,8 @@ I also created a Genre History Map to see if there was a chronological different
 </p>  			
   			<div class="hide_scroll1">		
   			
-  				<iframe width="800" height="600"  src="https://www.google.com/fusiontables/embedviz?containerId=googft-gviz-canvas&amp;q=select+col0%2C+col1+from+1VrWqwlaWeD2NvFUE2V8bOzEVBFOiY3WaNZDJ_zgc+where+col0+not+in+(&#39;&#39;%2C+&#39;Grand+Total&#39;)+order+by+col1+asc+limit+80&amp;viz=GVIZ&amp;t=PIE&amp;uiversion=2&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;gco_useFirstColumnAsDomain=true&amp;gco_is3D=true&amp;gco_pieHole=0&amp;gco_booleanRole=certainty&amp;gco_colors=%5B%22%233366CC%22%2C%22%23DC3912%22%2C%22%23FF9900%22%2C%22%23109618%22%2C%22%23990099%22%2C%22%230099C6%22%2C%22%23DD4477%22%2C%22%2366AA00%22%2C%22%23B82E2E%22%2C%22%23316395%22%2C%22%23994499%22%2C%22%2322AA99%22%2C%22%23AAAA11%22%2C%22%236633CC%22%2C%22%23E67300%22%2C%22%238B0707%22%2C%22%23651067%22%2C%22%23329262%22%2C%22%235574A6%22%2C%22%233B3EAC%22%2C%22%23B77322%22%2C%22%2316D620%22%2C%22%23B91383%22%2C%22%23F4359E%22%2C%22%239C5935%22%2C%22%23A9C413%22%2C%22%232A778D%22%2C%22%23668D1C%22%2C%22%23BEA413%22%2C%22%230C5922%22%2C%22%23743411%22%5D&amp;gco_hAxis=%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D&amp;gco_vAxes=%5B%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%2C%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%5D&amp;gco_title=Percentage+By+Genre&amp;width=800&amp;height=600"></iframe>
+  			
+  				<iframe width="800" height="1000" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?containerId=googft-gviz-canvas&amp;q=select+col0%2C+col1+from+1VrWqwlaWeD2NvFUE2V8bOzEVBFOiY3WaNZDJ_zgc+where+col0+not+in+(&#39;&#39;%2C+&#39;Grand+Total&#39;)+order+by+col0+asc+limit+80&amp;viz=GVIZ&amp;t=PIE&amp;uiversion=2&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;gco_useFirstColumnAsDomain=true&amp;gco_is3D=true&amp;gco_pieHole=0&amp;gco_booleanRole=certainty&amp;gco_colors=%5B%22%233366CC%22%2C%22%23DC3912%22%2C%22%23FF9900%22%2C%22%23109618%22%2C%22%23990099%22%2C%22%230099C6%22%2C%22%23DD4477%22%2C%22%2366AA00%22%2C%22%23B82E2E%22%2C%22%23316395%22%2C%22%23994499%22%2C%22%2322AA99%22%2C%22%23AAAA11%22%2C%22%236633CC%22%2C%22%23E67300%22%2C%22%238B0707%22%2C%22%23651067%22%2C%22%23329262%22%2C%22%235574A6%22%2C%22%233B3EAC%22%2C%22%23B77322%22%2C%22%2316D620%22%2C%22%23B91383%22%2C%22%23F4359E%22%2C%22%239C5935%22%2C%22%23A9C413%22%2C%22%232A778D%22%2C%22%23668D1C%22%2C%22%23BEA413%22%2C%22%230C5922%22%2C%22%23743411%22%5D&amp;gco_hAxis=%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D&amp;gco_vAxes=%5B%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%2C%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%5D&amp;gco_title=Percentage+By+Genre&amp;width=800&amp;height=1000"></iframe>
   			</div>
   				
 		  	<p>

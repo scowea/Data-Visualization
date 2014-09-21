@@ -87,6 +87,7 @@ apikey = "";
 
 var prev_infowindow = false;
 var prev_infowindow_animate = false;
+var lat_lng_counter = 0;
 
 //apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken,geo&has_geo=1";
 //Key:dd4eb2f7ebff37400f01aae57493f41e
@@ -299,6 +300,9 @@ $(document).ready(function(){
 	  						//});
 	    					infowindow_animate.open(map_animate,marker_animate);
 	  					});
+	  					
+	  					lat_lng_counter++;
+	  					$("#num_plotted_images").html('Photos With Coordinates: <b>' + lat_lng_counter + '</b>');
   					}
 					//............................
 										
@@ -455,7 +459,8 @@ function stop_timer() {
 			
 			<p>The first is a heat map, showing where and when the image showed up across the world.  You can zoom in on cities such as Log Angeles where many sightings of the image were documented.</p>
 			
-			<div id="flickr_count"></div><br>
+			<div id="flickr_count"></div>
+			<div id="num_plotted_images"></div><br>
 			<button onclick="toggleHeatmap()">Toggle Heatmap</button>
 			<button onclick="changeGradient()">Change gradient</button>
             <button onclick="changeRadius()">Change radius</button>
