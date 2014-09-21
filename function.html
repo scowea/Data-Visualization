@@ -56,7 +56,7 @@ function initialize() {
 //#####################################################################################
 	
 var gmarkers = [];	
-var marker_colors = ['FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','dc143c'];
+var marker_colors = ['FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','A52A2A','dc143c','FF0000',,'FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','dc143c'];
 var color_arr = [];
 var lat_lng_counter = 0;
 
@@ -210,7 +210,7 @@ $(document).ready(function(){
 			var lat = this_photo.gsx$latitude.$t; //this_photo.latitude; 
 			var lng = this_photo.gsx$longitude.$t; //this_photo.longitude;
 			
-			if ((lat != "") && (lng != "") && (this_photo.gsx$genre.$t != ""))
+			if ((lat != "") && (lng != "") && (this_photo.gsx$function.$t != ""))
 			{
 				
 				// geo code this address
@@ -228,12 +228,12 @@ $(document).ready(function(){
 				// this_photo.id
 
 				// if this genre is not already in the array of genres, then create the checkbox 
-				if (jQuery.inArray(this_photo.gsx$genre.$t, cat_arr) === -1)
+				if (jQuery.inArray(this_photo.gsx$function.$t, cat_arr) === -1)
 				{
 						
 					// load the array so we know we already created this checkbox the next loop iteration
-					cat_arr[cat_counter] = this_photo.gsx$genre.$t;
-					color_arr["'" + this_photo.gsx$genre.$t + "'"] = marker_colors[cat_counter];
+					cat_arr[cat_counter] = this_photo.gsx$function.$t;
+					color_arr["'" + this_photo.gsx$function.$t + "'"] = marker_colors[cat_counter];
 				
 					cat_counter++;
 				
@@ -245,14 +245,16 @@ $(document).ready(function(){
 			    	title: jQuery.trim(this_photo.gsx$description.$t),
 			     	visible: true,
 					clickable: true,
-					icon: 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_photo.gsx$genre.$t + "'"]
+					icon: 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_photo.gsx$function.$t + "'"]
 					//icon: './docs-assetts/small_dot.png'
 					
 					//shadow: 'http://www.mysite.com/markershadow.png'
 				});
 				
 				marker_animate.genre = this_photo.gsx$genre.$t;
-				marker_animate.category = 'genre';
+				marker_animate.media = this_photo.gsx$media.$t;
+				marker_animate.functions = this_photo.gsx$function.$t;
+				marker_animate.category = 'function';
 				
 				var infowindow_html = '<h3>'+this_photo.gsx$description.$t+'</h3>';
 				infowindow_html += '<img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br><br>';
@@ -300,7 +302,7 @@ $(document).ready(function(){
 	    	 	    		
 	
 		//............................................................................	
-		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<u>Show/Hide Genres:</u><br>');
+		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<u>Show/Hide Function:</u><br>');
 		 	
 		// if this genre is not already in the array of genres, then create the checkbox 
 		for (i = 0; i < cat_counter; i++)
@@ -311,7 +313,7 @@ $(document).ready(function(){
 			image_loc = 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_cat + "'"];
 			image_html = '<image src="'+ image_loc+'">';
 			// create the html for the checkbox
-			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+' <input type="checkbox" onclick="boxclick(this, ' + "'" + 'genre'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
+			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+' <input type="checkbox" onclick="boxclick(this, ' + "'" + 'functions'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
 		
 		} // end for (i = 1; i <= cat_counter; i++)
 				
@@ -336,7 +338,7 @@ function boxclick(box,category, id) {
 function show(category, id) {
 	
 	for (var i=0; i<gmarkers.length; i++) {
-     	if (gmarkers[i].genre == id) {
+     	if (gmarkers[i].functions == id) {
             gmarkers[i].setVisible(true);
         }
 	}
@@ -347,7 +349,7 @@ function show(category, id) {
 function hide(category, id) {
 
 	for (var i=0; i<gmarkers.length; i++) {
-    	if (gmarkers[i].genre == id) {
+    	if (gmarkers[i].functions == id) {
         	gmarkers[i].setVisible(false);
      	}
    	}
@@ -357,7 +359,7 @@ function hide(category, id) {
 
 function show_all() {
 
-	var category = 'genre';
+	var category = 'function';
 	
 	for (var i=0; i<gmarkers.length; i++) {
      	if (gmarkers[i].category == category) {
@@ -378,7 +380,7 @@ function show_all() {
 
 function hide_all() {
 
-	var category = 'genre';
+	var category = 'function';
 	
 	for (var i=0; i<gmarkers.length; i++) {
     	if (gmarkers[i].category == category) {
@@ -396,7 +398,6 @@ function hide_all() {
 
 
 		</script>
-
   	</head>
 
 	<body>
@@ -416,31 +417,32 @@ function hide_all() {
         
         		<div class="collapse navbar-collapse">
           			<ul class="nav navbar-nav">
-          		   	  <li ><a href="index.html">Home</a></li>
-			          <!-- <li><a href="introduction.html">Introduction</a></li> -->
-			          <li><a href="methodology.html">Methodology</a></li>
-			          <li><a href="coding.html">Coding</a></li>
-			          <li><a href="spatio_temporal.html">Spatio-Temporal</a></li>
-			          <li class="active"><a href="genre.html">Genre</a></li>
-			          <li><a href="media.html">Media</a></li>
-			          <li><a href="function.html">Function</a></li>
-			          <li><a href="collective_networking.html">Collective Networking</a></li>		             
-			          <li><a href="conclusion.html">Conclusion</a></li>
+						<li ><a href="index.html">Home</a></li>
+				      	<!-- <li><a href="introduction.html">Introduction</a></li> -->
+				      	<li><a href="methodology.html">Methodology</a></li>
+				      	<li><a href="coding.html">Coding</a></li>
+				      	<li><a href="spatio_temporal.html">Spatio-Temporal</a></li>
+				      	<li><a href="genre.html">Genre</a></li>
+				      	<li><a href="media.html">Media</a></li>
+				      	<li class="active"><a href="function.html">Function</a></li>
+				      	<li><a href="collective_networking.html">Collective Networking</a></li>
+				      	<li><a href="conclusion.html">Conclusion</a></li>
           			</ul>
         		</div><!--/.nav-collapse -->
     		</div><!--/.container -->
       
 		</div><!--/.navbar -->
 		
-	<div class="container">	  
-       		  
+	<div class="container">	
+		
        		<p><br /></p>
 			
        		
-     		<h2>Genre Maps</h2>
-<p>
-The first genre map is an Obamicon map. Obamicons are this. Structured in the style of Obama Hope, viewers can click on the different pixels to see all the different Obamicons that have been created. Links to those images are also available.
-</p>
+     		<h2>Function Maps</h2>
+     		<p>
+     		This map identifies all the different function Obama hope has been used as.  
+     		</p>
+     		
      		<div id="flickr_count"></div>
      		<div id="num_plotted_images"></div>
   			<div id="map-and-checkboxes-container">
@@ -448,23 +450,28 @@ The first genre map is an Obamicon map. Obamicons are this. Structured in the st
   			   	<div id="genre-checkboxes"> <button id='show_hide_button' onclick="hide_all()">Hide All</button></div>
   			</div>   	
 			<br>
-  			<hr />
-<p>
-The second genre map is a Genre Function Map. I took sightings from Heat Map and identified different functions image was playing in those spots. I also identified function of Obamicons on first genre map. This data helped me identify a spectrum of genre functions. This spectrum is illustrated by….
-</p><p>
-I also created a Genre History Map to see if there was a chronological differentiation over time of the Obama Hope’s use.      		
-</p>  			
-  			<div class="hide_scroll1">		
-  			
-  			
-  				<iframe width="800" height="1000" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?containerId=googft-gviz-canvas&amp;q=select+col0%2C+col1+from+1VrWqwlaWeD2NvFUE2V8bOzEVBFOiY3WaNZDJ_zgc+where+col0+not+in+(&#39;&#39;%2C+&#39;Grand+Total&#39;)+order+by+col0+asc+limit+80&amp;viz=GVIZ&amp;t=PIE&amp;uiversion=2&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;gco_useFirstColumnAsDomain=true&amp;gco_is3D=true&amp;gco_pieHole=0&amp;gco_booleanRole=certainty&amp;gco_colors=%5B%22%233366CC%22%2C%22%23DC3912%22%2C%22%23FF9900%22%2C%22%23109618%22%2C%22%23990099%22%2C%22%230099C6%22%2C%22%23DD4477%22%2C%22%2366AA00%22%2C%22%23B82E2E%22%2C%22%23316395%22%2C%22%23994499%22%2C%22%2322AA99%22%2C%22%23AAAA11%22%2C%22%236633CC%22%2C%22%23E67300%22%2C%22%238B0707%22%2C%22%23651067%22%2C%22%23329262%22%2C%22%235574A6%22%2C%22%233B3EAC%22%2C%22%23B77322%22%2C%22%2316D620%22%2C%22%23B91383%22%2C%22%23F4359E%22%2C%22%239C5935%22%2C%22%23A9C413%22%2C%22%232A778D%22%2C%22%23668D1C%22%2C%22%23BEA413%22%2C%22%230C5922%22%2C%22%23743411%22%5D&amp;gco_hAxis=%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D&amp;gco_vAxes=%5B%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%2C%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%5D&amp;gco_title=Percentage+By+Genre&amp;width=800&amp;height=1000"></iframe>
-  			</div>
+  			<hr>
+  		
   				
+  			<h2>Rhetorical Function Piechart</h2>
+  			<p>
+  				Based on its use in these various collectives, this map identifies how obama hope has functioned differently as it has been entered into diverse associations.
+  			</p>
+  			<div class="hide_scroll1">	  			
+  				<iframe width="800" height="1000" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?containerId=googft-gviz-canvas&amp;q=select+col0%2C+col1+from+1WHb-wbF6eesS3O8WcnWqxb4WNQoCiRfv3e2l4I0V+where+col0+not+equal+to+&#39;Grand+Total&#39;+order+by+col0+asc+limit+80&amp;viz=GVIZ&amp;t=PIE&amp;uiversion=2&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;gco_useFirstColumnAsDomain=true&amp;gco_is3D=false&amp;gco_pieHole=0&amp;gco_booleanRole=certainty&amp;gco_colors=%5B%22%233366CC%22%2C%22%23DC3912%22%2C%22%23FF9900%22%2C%22%23109618%22%2C%22%23990099%22%2C%22%230099C6%22%2C%22%23DD4477%22%2C%22%2366AA00%22%2C%22%23B82E2E%22%2C%22%23316395%22%2C%22%23994499%22%2C%22%2322AA99%22%2C%22%23AAAA11%22%2C%22%236633CC%22%2C%22%23E67300%22%2C%22%238B0707%22%2C%22%23651067%22%2C%22%23329262%22%2C%22%235574A6%22%2C%22%233B3EAC%22%2C%22%23B77322%22%2C%22%2316D620%22%2C%22%23B91383%22%2C%22%23F4359E%22%2C%22%239C5935%22%2C%22%23A9C413%22%2C%22%232A778D%22%2C%22%23668D1C%22%2C%22%23BEA413%22%2C%22%230C5922%22%2C%22%23743411%22%5D&amp;gco_hAxis=%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D&amp;gco_vAxes=%5B%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%2C%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%5D&amp;gco_legendTextStyle=%7B%22color%22%3A%22%23222%22%2C+%22fontSize%22%3A%2210%22%7D&amp;gco_pieSliceText=percentage&amp;gco_title=Percentage+By+Function&amp;gco_legend=left&amp;gco_titleTextStyle=%7B%22color%22%3A%22%23000%22%2C+%22fontSize%22%3A%2214%22%2C+%22bold%22%3Atrue%7D&amp;width=800&amp;height=1000"></iframe>
+  			</div>		
+  				
+  			
+  		
+  			
+  			<hr />
+ 	
 		  	<p>
-				<a class="btn btn-success btn-lg" role="button" href="media.html" >Continue &raquo; Media</a>
-			</p>
-			<hr />    			
-  								
+		<a class="btn btn-success btn-lg" role="button" href="collective_networking.html" >Continue &raquo; Collective Networking</a>
+		</p>
+		 			
+  				<hr />		
+  					
       		<footer>
         		<p>&copy; <a href=http://eWeaverSolutions.com target=_blank>eWeaver Solutions</a> 2014</p>
       		</footer>

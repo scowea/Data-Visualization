@@ -210,7 +210,7 @@ $(document).ready(function(){
 			var lat = this_photo.gsx$latitude.$t; //this_photo.latitude; 
 			var lng = this_photo.gsx$longitude.$t; //this_photo.longitude;
 			
-			if ((lat != "") && (lng != ""))
+			if ((lat != "") && (lng != "") && (this_photo.gsx$media.$t != ""))
 			{
 				
 				// geo code this address
@@ -423,6 +423,7 @@ function hide_all() {
 				      	<li><a href="spatio_temporal.html">Spatio-Temporal</a></li>
 				      	<li><a href="genre.html">Genre</a></li>
 				      	<li class="active"><a href="media.html">Media</a></li>
+				      	<li><a href="function.html">Function</a></li>
 				      	<li><a href="collective_networking.html">Collective Networking</a></li>
 				      	<li><a href="conclusion.html">Conclusion</a></li>
           			</ul>
