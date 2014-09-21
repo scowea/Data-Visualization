@@ -230,11 +230,12 @@ $(document).ready(function(){
 				// if this genre is not already in the array of genres, then create the checkbox 
 				if (jQuery.inArray(this_photo.gsx$genre.$t, cat_arr) === -1)
 				{
-					cat_counter++;
-					
+						
 					// load the array so we know we already created this checkbox the next loop iteration
 					cat_arr[cat_counter] = this_photo.gsx$genre.$t;
 					color_arr["'" + this_photo.gsx$genre.$t + "'"] = marker_colors[cat_counter];
+				
+					cat_counter++;
 				
 				}  				
 			  		
@@ -302,7 +303,7 @@ $(document).ready(function(){
 		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<u>Show/Hide Genres:</u><br>');
 		 	
 		// if this genre is not already in the array of genres, then create the checkbox 
-		for (i = 1; i <= cat_counter; i++)
+		for (i = 0; i < cat_counter; i++)
 		{	
 			// get each genre type
 			this_cat = cat_arr[i]; 
