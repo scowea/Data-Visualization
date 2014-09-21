@@ -105,12 +105,22 @@ $(document).ready(function(){
 	    		// get each photo info..
 	    		$.each(json.feed.entry,function(i,this_photo){
 					
-					if ((this_photo.gsx$datetaken.$t !== '') && (this_photo.gsx$datetaken.$t.substr(0,2) !== '') && (this_photo.gsx$datetaken.$t.substr(3,2)) && (this_photo.gsx$datetaken.$t.substr(6,4)))
+					if ((this_photo.gsx$datetaken.$t !== '') && 
+						(this_photo.gsx$datetaken.$t.substr(0,2) !== '') && 
+						(this_photo.gsx$datetaken.$t.substr(3,2)) && 
+						(this_photo.gsx$datetaken.$t.substr(6,4)) &&
+						(this_photo.gsx$isobamacon.$t == 'YES')
+					)
 					{
 						count++; // count each photo as we process it...
 						$("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
 						$("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');					
 						$("#status_message").html('<h2>One Moment Please...</h2>');
+						
+						
+
+						$("#num_obamicons").html('Photos that are Obamicons: <b>' + count + '</b>');	
+
 						
 						// get the month and year of the date this photo was taken		
 						// format: yyyy-mm-dd
@@ -155,17 +165,12 @@ $(document).ready(function(){
 						progress_bar.style.width = percentage_loaded+'%';
 						
 						// show the ending total count
-		    			if (count >= (total_photos-100))
-		    			{
+		    			//if (count >= (total_photos-100))
+		    			//{
 		    				$("#status_message").html(''); // clear the status message
 							$("#flickr_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
-							progress_bar.style.width = '100%';
-							
-							// we are done so hide the progress bar
-							var progress_bar_container = document.getElementById('progress');
-							progress_bar_container.style.visibility="hidden";
-							
-						} // end if (count >= (total_photos-250))
+									
+						//} // end if (count >= (total_photos-250))
 					} // end if datetaken is blank...
 						  					
 				}); // end $.each(json.photos.photo,function(i,myresult){
@@ -173,8 +178,15 @@ $(document).ready(function(){
 	    	//}); // end $.getJSON(apiurl,function(json){    
 	    		
 	     //} // end for (var this_page=1;this_page<=num_photo_pages;this_page++)
-
-
+		
+		var progress_bar = document.getElementById('progress-bar');
+		progress_bar.style.width = '100%';
+							 					
+		// we are done so hide the progress bar
+		var progress_bar_container = document.getElementById('progress');
+		progress_bar_container.style.visibility="hidden";
+		
+			
 		// build the yAxis labels and get data in a format that highcharts likes
 		year_arr_index = 0;
 		month_arr_index = 0;
@@ -366,7 +378,9 @@ $(document).ready(function(){
      		</p>
 	
        		
-<div id="mosaically"></div><script type="text/javascript" src="http://mosaically.com/Scripts/embed.js"></script><script type="text/javascript">mosaically("d999f640-1d77-4795-8ade-1baa794eec32");</script>
+<div id="mosaically"></div>
+<script type="text/javascript" src="http://mosaically.com/Scripts/embed.js"></script>
+<script type="text/javascript">mosaically("d999f640-1d77-4795-8ade-1baa794eec32");</script>
 <hr>
 
       		
@@ -374,6 +388,8 @@ $(document).ready(function(){
 				<div id="progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div> 
 			</div>
        		<div id="flickr_count"></div>
+       		<div id="num_obamicons"></div>
+  	
      
      		<div class="well"><p>
      			<div id="status_message"></div>
