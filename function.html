@@ -20,7 +20,8 @@ Date: 2014-02-01
  		<script src="js/jquery.min.js"></script>
 				
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=visualization"></script>
-
+		<script src="http://code.highcharts.com/highcharts.js"></script>
+		<script src="http://code.highcharts.com/modules/exporting.js"></script>
 		
 <script>
 // create the map 
@@ -89,6 +90,14 @@ $(document).ready(function(){
 	count = 0;
 	percentage_loaded = 0;
 	google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
+	
+	//sheet_id = 'od6'; // main sheet is always od6
+	//sheet_id = 'oete2cj'; // media pivot table
+	//sheet_id = 'onodyhn'; // genre pivot table
+	sheet_id = 'oisw0ui'; // function pivot table
+	apiurl_specific_sheet = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/"+sheet_id+"/public/values?alt=json";
+	
+	
 	apiurl = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/od6/public/values?alt=json";
 	apiurl_html = "https://docs.google.com/spreadsheets/d/"+google_spreadsheet_id+"/pubhtml";
 	apikey = "";
@@ -97,6 +106,10 @@ $(document).ready(function(){
 	var prev_infowindow = false;
 	var prev_infowindow_animate = false;
 	
+	var grand_total = 0;
+	var percentage_arr = new Array();
+	var counter_arr = new Array();
+
 	//apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken,geo&has_geo=1";
 	//Key:dd4eb2f7ebff37400f01aae57493f41e
 	//Secret:7a6541283f6e96bf
@@ -322,6 +335,134 @@ $(document).ready(function(){
 
 	google.maps.event.addDomListener(window, 'load', initialize);
 	
+		//****************************************************************************
+	// GATHER THE DATA FOR THE PIE CHART..
+	//***************************************
+	$.getJSON(apiurl_specific_sheet,function(json){
+    
+	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
+	   
+	    // total of all photos across all pages
+	    total_photos = json.feed.openSearch$totalResults.$t;
+	         
+	    // initialize the counter     
+	    count = 0;
+	    		
+		// get each photo info..
+		$.each(json.feed.entry,function(i,this_photo){
+			
+			//"gsx$functiontype" : { "$t" : "Acrylic" },
+            //"gsx$numitems" : { "$t" : "1" },
+			
+			if ((this_photo.gsx$functiontype.$t !== '') )
+			{
+				// look for the grand total of the counts
+				if (this_photo.gsx$functiontype.$t == 'Grand Total')
+				{
+					grand_total = this_photo.gsx$numitems.$t;
+				}
+				else
+				{
+					// it needs to end up looking like the following:
+					//percentage_arr[0] = ['fist_genre', 50];
+					//percentage_arr[1] = ['second_genre', 10];
+					//percentage_arr[2] = ['third_genre', 20];
+					//percentage_arr[3] = ['fourth_genre', 8];
+					//percentage_arr[4] = ['fith_genre', 2];
+					
+					counter_arr[count] = [this_photo.gsx$functiontype.$t, parseFloat(this_photo.gsx$numitems.$t)];
+					
+					console.debug(this_photo.gsx$functiontype.$t+'='+ this_photo.gsx$numitems.$t);									
+					count++; // count each photo as we process it...
+				}	
+			} // end if datetaken is blank...
+				  					
+		}); // end $.each(json.photos.photo,function(i,myresult){
+		
+		console.debug("count:" +count);
+		console.debug("grand_total:" +grand_total);
+		console.debug("0:" +counter_arr[0]);
+		console.debug("1:" +counter_arr[1]);
+		console.debug("2:" +counter_arr[2]);
+		console.debug("3:" +counter_arr[3]);
+		console.debug("4:" +counter_arr[4]);
+		console.debug("5:" +counter_arr[5]);
+			
+
+	    //.................................................
+	    // DEBUG
+	    console.debug('YEARLY: yAxis labels = ' + year_labels_arr);
+		console.debug('YEARLY: highcharts data array = ' + year_data_arr);
+	
+
+	
+		//*****************************************************
+		// Radialize the colors to make them gradient
+	    Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function (color) {
+	        return {
+	            radialGradient: { cx: 0.5, cy: 0.3, r: 0.7 },
+	            stops: [
+	                [0, color],
+	                [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
+	            ]
+	        };
+	    });
+		
+		// Build the chart
+	    $('#function_pie_chart').highcharts({
+	       chart: {
+	            plotBackgroundColor: null,
+	            plotBorderWidth: null,
+	            plotShadow: true
+	        },
+	        title: {
+	            text: '<b>Percentage of Function</b>'
+	        },
+	        tooltip: {
+	            pointFormat: '{series.name}: <b>{point.percentage:.1f}% ({point.y})</b>'
+	        },
+	        plotOptions: {
+	            pie: {
+	                allowPointSelect: true,
+	                cursor: 'pointer',
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
+			            style: {
+		                	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                },
+	                    connectorColor: 'silver'
+	                }
+	            }
+	        },
+	        series: [{
+	            type: 'pie',
+	            name: 'Percentage of Function',
+	            data: counter_arr,
+	            showInLegend: false
+	        }],
+	        legend: {
+            	align: 'right',
+            	   layout: 'vertical',
+            	verticalAlign: 'top',
+            	x: 0,
+            	y: 100,
+            	navigation: {
+                	activeColor: '#3E576F',
+                	animation: true,
+                	arrowSize: 12,
+                	inactiveColor: '#CCC',
+                	style: {
+                    	fontWeight: 'bold',
+                    	color: '#333',
+                    	fontSize: '12px'
+                	}
+            	}
+        	},
+	    });
+	     	    
+	}); // end getJson()
+	
 }); // end $(document).ready(function(){
 
 
@@ -458,9 +599,8 @@ function hide_all() {
   			<p>
   				Based on its use in these various collectives, this map identifies how obama hope has functioned differently as it has been entered into diverse associations.
   			</p>
-  			<div class="hide_scroll1">	  			
-  				<iframe width="800" height="1000" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?containerId=googft-gviz-canvas&amp;q=select+col0%2C+col1+from+1WHb-wbF6eesS3O8WcnWqxb4WNQoCiRfv3e2l4I0V+where+col0+not+equal+to+&#39;Grand+Total&#39;+order+by+col0+asc+limit+80&amp;viz=GVIZ&amp;t=PIE&amp;uiversion=2&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;gco_useFirstColumnAsDomain=true&amp;gco_is3D=false&amp;gco_pieHole=0&amp;gco_booleanRole=certainty&amp;gco_colors=%5B%22%233366CC%22%2C%22%23DC3912%22%2C%22%23FF9900%22%2C%22%23109618%22%2C%22%23990099%22%2C%22%230099C6%22%2C%22%23DD4477%22%2C%22%2366AA00%22%2C%22%23B82E2E%22%2C%22%23316395%22%2C%22%23994499%22%2C%22%2322AA99%22%2C%22%23AAAA11%22%2C%22%236633CC%22%2C%22%23E67300%22%2C%22%238B0707%22%2C%22%23651067%22%2C%22%23329262%22%2C%22%235574A6%22%2C%22%233B3EAC%22%2C%22%23B77322%22%2C%22%2316D620%22%2C%22%23B91383%22%2C%22%23F4359E%22%2C%22%239C5935%22%2C%22%23A9C413%22%2C%22%232A778D%22%2C%22%23668D1C%22%2C%22%23BEA413%22%2C%22%230C5922%22%2C%22%23743411%22%5D&amp;gco_hAxis=%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D&amp;gco_vAxes=%5B%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%2C%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%5D&amp;gco_legendTextStyle=%7B%22color%22%3A%22%23222%22%2C+%22fontSize%22%3A%2210%22%7D&amp;gco_pieSliceText=percentage&amp;gco_title=Percentage+By+Function&amp;gco_legend=left&amp;gco_titleTextStyle=%7B%22color%22%3A%22%23000%22%2C+%22fontSize%22%3A%2214%22%2C+%22bold%22%3Atrue%7D&amp;width=800&amp;height=1000"></iframe>
-  			</div>		
+  			<div id="function_pie_chart" style="width: 900px; height: 500px"></div>
+  			
   				
   			
   		
