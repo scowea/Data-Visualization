@@ -311,9 +311,9 @@ $(document).ready(function(){
 			this_cat = cat_arr[i]; 
 		
 			image_loc = 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_cat + "'"];
-			image_html = '<image src="'+ image_loc+'">';
+			image_html = '<image src="'+ image_loc+'" width=10px class="checkbox_icon">';
 			// create the html for the checkbox
-			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+' <input type="checkbox" onclick="boxclick(this, ' + "'" + 'functions'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
+			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+'&nbsp; <input type="checkbox" onclick="boxclick(this, ' + "'" + 'functions'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
 		
 		} // end for (i = 1; i <= cat_counter; i++)
 				

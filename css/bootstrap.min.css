@@ -22,3 +22,7 @@ audio,canvas,progress,video{display:inline-block;vertical-align:baseline}audio:n
 .superscript { vertical-align: super; font-size: -50%}
 
 .h4  { font-weight: bold important!;}
+
+.checkbox_icon {vertical-align: baseline !important;}
+
+

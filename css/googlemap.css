@@ -25,4 +25,11 @@ html, body, .container,#genre-map {
 
 #genre-checkboxes {
 	float: right;
+	line-height: 10px;
 }
+
+#show_hide_button {
+	line-height: 20px !important;
+}
+
+

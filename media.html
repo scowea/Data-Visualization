@@ -20,7 +20,8 @@ Date: 2014-02-01
  		<script src="js/jquery.min.js"></script>
 				
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=visualization"></script>
-
+		<script src="highcharts/js/highcharts.js"></script>
+		
 		
 <script>
 // create the map 
@@ -52,7 +53,8 @@ function initialize() {
 
 
 </script>
-	<script>
+
+<script>
 //#####################################################################################
 	
 var gmarkers = [];	
@@ -113,9 +115,10 @@ $(document).ready(function(){
 	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
 	map_animate = new google.maps.Map(document.getElementById("genre-map"), map_animateOptions);    
 	  	
+	jQuery.support.cors = true;  	
     // get the data from the google spreadsheet
     $.getJSON(apiurl,function(json){
-    	
+  
     	// show status messages...
     	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
     	$("#loading_progressbar").html(percentage_loaded); 
@@ -303,23 +306,86 @@ $(document).ready(function(){
 		//............................................................................	
 		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<u>Show/Hide Media:</u><br>');
 		 	
-		// if this genre is not already in the array of genres, then create the checkbox 
+		// roll through the array of genres, and create the checkboxes 
 		for (i = 0; i < cat_counter; i++)
 		{	
 			// get each genre type
 			this_cat = cat_arr[i]; 
 		
 			image_loc = 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_cat + "'"];
-			image_html = '<image src="'+ image_loc+'">';
+			image_html = '<image src="'+ image_loc+'" width=10px class="checkbox_icon" >';
 			// create the html for the checkbox
-			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+' <input type="checkbox" onclick="boxclick(this, ' + "'" + 'media'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
+			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+'&nbsp; <input type="checkbox" onclick="boxclick(this, ' + "'" + 'media'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
 		
 		} // end for (i = 1; i <= cat_counter; i++)
 				
-	}); // end $.getJSON(apiurl,function(json){   
+	});
+	//.success(function() {
+	//		console.log("success");
+	//}); // end $.getJSON(apiurl,function(json){   
 
 
 	google.maps.event.addDomListener(window, 'load', initialize);
+	
+	
+	//****************************************************************************
+	   // Radialize the colors
+    Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function (color) {
+        return {
+            radialGradient: { cx: 0.5, cy: 0.3, r: 0.7 },
+            stops: [
+                [0, color],
+                [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
+            ]
+        };
+    });
+	 // Build the chart
+        $('#media_pie_chart').highcharts({
+           chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: 'Browser market shares at a specific website, 2014'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                    style: {
+                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                    },
+                    connectorColor: 'silver'
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Browser share',
+            data: [
+                ['Firefox',   45.0],
+                ['IE',       26.8],
+                {
+                    name: 'Chrome',
+                    y: 12.8,
+                    sliced: true,
+                    selected: true
+                },
+                ['Safari',    8.5],
+                ['Opera',     6.2],
+                ['Others',   0.7]
+            ]
+        }]
+    });
+	
+	
 	
 }); // end $(document).ready(function(){
 
@@ -457,7 +523,10 @@ function hide_all() {
   			<p>
     			</p>
   				
-  			<div class="hide_scroll1">		
+  			<div class="hide_scroll1">	
+  				<h1>new:</h1>	
+<div id="media_pie_chart" style="width: 900px; height: 500px"></div>
+<h1>old:</h1>
   				<iframe width="800" height="1000" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?containerId=googft-gviz-canvas&amp;q=select+col0%2C+col1+from+1L1G8tsc2CLzuQ2ynrW56NP_-juhrkVKv6UhzDzh7+where+col0+not+equal+to+&#39;Grand+Total&#39;+order+by+col0+asc+limit+100&amp;viz=GVIZ&amp;t=PIE&amp;uiversion=2&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;gco_useFirstColumnAsDomain=true&amp;gco_is3D=false&amp;gco_pieHole=0.25&amp;gco_booleanRole=certainty&amp;gco_colors=%5B%22%233366CC%22%2C%22%23DC3912%22%2C%22%23FF9900%22%2C%22%23109618%22%2C%22%23990099%22%2C%22%230099C6%22%2C%22%23DD4477%22%2C%22%2366AA00%22%2C%22%23B82E2E%22%2C%22%23316395%22%2C%22%23994499%22%2C%22%2322AA99%22%2C%22%23AAAA11%22%2C%22%236633CC%22%2C%22%23E67300%22%2C%22%238B0707%22%2C%22%23651067%22%2C%22%23329262%22%2C%22%235574A6%22%2C%22%233B3EAC%22%2C%22%23B77322%22%2C%22%2316D620%22%2C%22%23B91383%22%2C%22%23F4359E%22%2C%22%239C5935%22%2C%22%23A9C413%22%2C%22%232A778D%22%2C%22%23668D1C%22%2C%22%23BEA413%22%2C%22%230C5922%22%2C%22%23743411%22%5D&amp;gco_hAxis=%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D&amp;gco_vAxes=%5B%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%2C%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%5D&amp;gco_title=Percentage+By+Media&amp;gco_legend=right&amp;width=800&amp;height=1000"></iframe>
   			</div>
   			
