@@ -71,6 +71,7 @@ $(document).ready(function(){
 	
 	
 	cat_arr = new Array();
+	alpha_cat_arr = new Array();
 	cat_counter = 0;
 	
 
@@ -248,8 +249,10 @@ $(document).ready(function(){
 					cat_arr[cat_counter] = this_photo.gsx$genre.$t;
 					color_arr["'" + this_photo.gsx$genre.$t + "'"] = marker_colors[cat_counter];
 				
-					cat_counter++;
+					alpha_cat_arr[cat_counter] = [this_photo.gsx$genre.$t, marker_colors[cat_counter]];
 				
+					cat_counter++;
+					
 				}  				
 			  		
 				var marker_animate = new google.maps.Marker({							
@@ -315,18 +318,20 @@ $(document).ready(function(){
 		//............................................................................	
 		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<u>Show/Hide Genres:</u><br>');
 		 	
-		// if this genre is not already in the array of genres, then create the checkbox 
-		for (i = 0; i < cat_counter; i++)
-		{	
-			// get each genre type
-			this_cat = cat_arr[i]; 
+		alpha_cat_arr.sort(sortFunction);
 		
-			image_loc = 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_cat + "'"];
+		for (i = 0; i < alpha_cat_arr.length; i++)
+		{
+			// get each genre type
+			this_cat = alpha_cat_arr[i][0]; 
+		
+			image_loc = 'http://www.googlemapsmarkers.com/v1/' + alpha_cat_arr[i][1];
 			image_html = '<image src="'+ image_loc+'" width=10px class="checkbox_icon">';
 			// create the html for the checkbox
 			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+' &nbsp;<input type="checkbox" onclick="boxclick(this, ' + "'" + 'genre'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
-		
-		} // end for (i = 1; i <= cat_counter; i++)
+				
+			
+		}
 				
 	}); // end $.getJSON(apiurl,function(json){   
 
@@ -536,6 +541,24 @@ function hide_all() {
   	$('#show_hide_button').attr('onclick','show_all()');
   	$('#show_hide_button').html('Show All');
 } 
+
+function sortFunction(a, b) {
+    if (a[0] === b[0]) {
+        return 0;
+    }
+    else {
+        return (a[0] < b[0]) ? -1 : 1;
+    }
+}
+
+function compareSecondColumn(a, b) {
+    if (a[1] === b[1]) {
+        return 0;
+    }
+    else {
+        return (a[1] < b[1]) ? -1 : 1;
+    }
+}
 //#####################################################################################
 
 
