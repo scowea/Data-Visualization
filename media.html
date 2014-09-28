@@ -20,8 +20,8 @@ Date: 2014-02-01
  		<script src="js/jquery.min.js"></script>
 				
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=visualization"></script>
-		<script src="highcharts/js/highcharts.js"></script>
-		
+<script src="http://code.highcharts.com/highcharts.js"></script>
+		<script src="http://code.highcharts.com/modules/exporting.js"></script>
 		
 <script>
 // create the map 
@@ -91,7 +91,13 @@ $(document).ready(function(){
 	count = 0;
 	percentage_loaded = 0;
 	google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
+	
 	apiurl = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/od6/public/values?alt=json";
+	//sheet_id = 'od6'; // main sheet is always od6
+	sheet_id = 'oete2cj'; // media pivot table
+	//sheet_id = 'onodyhn'; // genre pivot table
+	//sheet_id = 'oisw0ui'; // function pivot table
+	apiurl_specific_sheet = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/"+sheet_id+"/public/values?alt=json";
 	apiurl_html = "https://docs.google.com/spreadsheets/d/"+google_spreadsheet_id+"/pubhtml";
 	apikey = "";
 	
@@ -99,6 +105,9 @@ $(document).ready(function(){
 	var prev_infowindow = false;
 	var prev_infowindow_animate = false;
 	
+	var grand_total = 0;
+	var percentage_arr = new Array();
+	var counter_arr = new Array();
 	//apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken,geo&has_geo=1";
 	//Key:dd4eb2f7ebff37400f01aae57493f41e
 	//Secret:7a6541283f6e96bf
@@ -115,7 +124,7 @@ $(document).ready(function(){
 	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
 	map_animate = new google.maps.Map(document.getElementById("genre-map"), map_animateOptions);    
 	  	
-	jQuery.support.cors = true;  	
+	//jQuery.support.cors = true;  	
     // get the data from the google spreadsheet
     $.getJSON(apiurl,function(json){
   
@@ -320,73 +329,253 @@ $(document).ready(function(){
 		} // end for (i = 1; i <= cat_counter; i++)
 				
 	});
-	//.success(function() {
-	//		console.log("success");
-	//}); // end $.getJSON(apiurl,function(json){   
+
 
 
 	google.maps.event.addDomListener(window, 'load', initialize);
 	
 	
 	//****************************************************************************
-	   // Radialize the colors
-    Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function (color) {
-        return {
-            radialGradient: { cx: 0.5, cy: 0.3, r: 0.7 },
-            stops: [
-                [0, color],
-                [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
-            ]
-        };
-    });
-	 // Build the chart
-        $('#media_pie_chart').highcharts({
-           chart: {
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false
+	// GATHER THE DATA FOR THE PIE CHART..
+	//***************************************
+	$.getJSON(apiurl_specific_sheet,function(json){
+  
+ 	    
+	        	// show status messages...
+    	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
+    	$("#loading_progressbar").html(percentage_loaded); 
+	    $("#data_source").html("[<a target=_blank href="+apiurl+">Data Source</a>]");
+	  
+	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
+	   
+	    // total of all photos across all pages
+	    total_photos = json.feed.openSearch$totalResults.$t;
+	    
+	     
+	    count = 0;
+		
+	    		
+		// get each photo info..
+		$.each(json.feed.entry,function(i,this_photo){
+			
+			//"gsx$mediatype" : { "$t" : "Acrylic" },
+            //"gsx$numitems" : { "$t" : "1" },
+			
+			if ((this_photo.gsx$mediatype.$t !== '') )
+			{
+				// look for the grand total of the counts
+				if (this_photo.gsx$mediatype.$t == 'Grand Total')
+				{
+					grand_total = this_photo.gsx$numitems.$t;
+				}
+				else
+				{
+					
+	
+					// it needs to end up looking like the following:
+					//percentage_arr[0] = ['fist_genre', 50];
+					//percentage_arr[1] = ['second_genre', 10];
+					//percentage_arr[2] = ['third_genre', 20];
+					//percentage_arr[3] = ['fourth_genre', 8];
+					//percentage_arr[4] = ['fith_genre', 2];
+					
+					counter_arr[count] = [this_photo.gsx$mediatype.$t, parseFloat(this_photo.gsx$numitems.$t)];
+					
+					month = 0;
+					day = 0;
+					year = 0;
+					
+					//console.debug('data:' +month+'-'+day+'-'+year);
+					console.debug(this_photo.gsx$mediatype.$t+'='+ this_photo.gsx$numitems.$t);
+									
+					// increment the counter for the year this photo was taken
+					count_per_year_arr[year]++;      		
+					count_per_month_arr[month+''+year]++;   		     		
+					count_per_day_arr[day+''+month+''+year]++;  
+					
+					count++; // count each photo as we process it...
+	 		
+				}	
+			} // end if datetaken is blank...
+				  					
+		}); // end $.each(json.photos.photo,function(i,myresult){
+		
+		console.debug("count:" +count);
+		console.debug("grand_total:" +grand_total);
+		console.debug("0:" +counter_arr[0]);
+		console.debug("1:" +counter_arr[1]);
+		console.debug("2:" +counter_arr[2]);
+		console.debug("3:" +counter_arr[3]);
+		console.debug("4:" +counter_arr[4]);
+		console.debug("5:" +counter_arr[5]);
+			
+		// build the yAxis labels and get data in a format that highcharts likes
+		year_arr_index = 0;
+		month_arr_index = 0;
+		day_arr_index = 0;
+		
+		for (this_year = 2006; this_year <= 2014; this_year++)
+	    {
+	    	// year labels...
+	    	year_labels_arr[year_arr_index] = this_year;
+	    		    	
+	    	// move the counts into the delivery array that highchart wants... index of 0,1,2,3,4,5,6,7,8,etc..
+	    	year_data_arr[year_arr_index] = count_per_year_arr[this_year];
+	    	
+
+	    		    	
+	    	// increment the yearly index
+	    	year_arr_index++;
+
+	    } // end for (this_year = 2006; this_year <= 2014; this_year++)
+	    
+	    //.................................................
+	    // DEBUG
+	    console.debug('YEARLY: yAxis labels = ' + year_labels_arr);
+		console.debug('YEARLY: highcharts data array = ' + year_data_arr);
+	
+
+	
+		//*****************************************************
+		// Radialize the colors to make them gradient
+	    Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function (color) {
+	        return {
+	            radialGradient: { cx: 0.5, cy: 0.3, r: 0.7 },
+	            stops: [
+	                [0, color],
+	                [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
+	            ]
+	        };
+	    });
+		
+		
+		percentage_arr[0] = ['fist_genre', 50];
+		percentage_arr[1] = ['second_genre', 10];
+		percentage_arr[2] = ['third_genre', 20];
+		percentage_arr[3] = ['fourth_genre', 8];
+		percentage_arr[4] = ['fith_genre', 2];
+		//wrapper_percentage_arr = percentage_arr;
+		
+		//[
+	    //   ['Firefox',   45.0],
+	    //   ['IE',       26.8],
+	    //   ['Chrome',   12.8],
+	    //   ['Safari',    8.5],
+	    //   ['Opera',     6.2],
+	    //   ['Others',   0.7]
+	    //]
+		
+		
+		// Build the chart
+	    $('#media_pie_chart').highcharts({
+	       chart: {
+	            plotBackgroundColor: null,
+	            plotBorderWidth: null,
+	            plotShadow: true
+	        },
+	        title: {
+	            text: '<b>Percentage of Media</b>'
+	        },
+	        tooltip: {
+	            pointFormat: '{series.name}: <b>{point.percentage:.1f}% ({point.y})</b>'
+	        },
+	        plotOptions: {
+	            pie: {
+	                allowPointSelect: true,
+	                cursor: 'pointer',
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
+			            style: {
+		                	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                },
+	                    connectorColor: 'silver'
+	                }
+	            }
+	        },
+	        series: [{
+	            type: 'pie',
+	            name: 'Percentage of Media',
+	            data: counter_arr,
+	            showInLegend: false
+	        }],
+	        legend: {
+            	align: 'right',
+            	   layout: 'vertical',
+            	verticalAlign: 'top',
+            	x: 0,
+            	y: 100,
+            	navigation: {
+                	activeColor: '#3E576F',
+                	animation: true,
+                	arrowSize: 12,
+                	inactiveColor: '#CCC',
+                	style: {
+                    	fontWeight: 'bold',
+                    	color: '#333',
+                    	fontSize: '12px'
+                	}
+            	}
+        	},
+        	
+	        
+	    });
+	    
+	       $('#test_chart').highcharts({
+
+        chart: {
+            type: 'pie',
+            width: 500,
+            borderWidth: 2
         },
+
         title: {
-            text: 'Browser market shares at a specific website, 2014'
+            text: 'Legend navigation demo'
         },
-        tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+
+        credits: {
+            enabled: false
         },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                    style: {
-                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                    },
-                    connectorColor: 'silver'
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'top',
+            y: 30,
+            navigation: {
+                activeColor: '#3E576F',
+                animation: true,
+                arrowSize: 12,
+                inactiveColor: '#CCC',
+                style: {
+                    fontWeight: 'bold',
+                    color: '#333',
+                    fontSize: '12px'
                 }
             }
         },
+
         series: [{
-            type: 'pie',
-            name: 'Browser share',
-            data: [
-                ['Firefox',   45.0],
-                ['IE',       26.8],
-                {
-                    name: 'Chrome',
-                    y: 12.8,
-                    sliced: true,
-                    selected: true
-                },
-                ['Safari',    8.5],
-                ['Opera',     6.2],
-                ['Others',   0.7]
-            ]
+            data: (function () {
+                var names = 'Ari,Bjartur,Bogi,Bragi,Dánjal,Dávur,Eli,Emil,Fróði,Hákun,Hanus,Hjalti,Ísakur,' +
+                    'Johan,Jóhan,Julian,Kristian,Leon,Levi,Magnus,Martin,Mattias,Mikkjal,Nóa,Óli,Pauli,Petur,Rói,Sveinur,Teitur',
+                    arr = [];
+
+                Highcharts.each(names.split(','), function (name) {
+                    arr.push({
+                        name: name,
+                        y: Math.round(Math.random() * 100)
+                    });
+                });
+
+                return arr;
+            }()),
+            showInLegend: true
         }]
+
     });
-	
-	
-	
+	    
+	}); // end getJson()	
 }); // end $(document).ready(function(){
 
 
@@ -516,21 +705,11 @@ function hide_all() {
   			   	<div id="genre-checkboxes"> <button id='show_hide_button' onclick="hide_all()">Hide All</button></div>
   			</div>   	
 			<br>
-  			<hr />
-  			<hr />
-  			  			<br>
-  			<hr>
-  			<p>
-    			</p>
-  				
-  			<div class="hide_scroll1">	
-  				<h1>new:</h1>	
-<div id="media_pie_chart" style="width: 900px; height: 500px"></div>
-<h1>old:</h1>
-  				<iframe width="800" height="1000" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?containerId=googft-gviz-canvas&amp;q=select+col0%2C+col1+from+1L1G8tsc2CLzuQ2ynrW56NP_-juhrkVKv6UhzDzh7+where+col0+not+equal+to+&#39;Grand+Total&#39;+order+by+col0+asc+limit+100&amp;viz=GVIZ&amp;t=PIE&amp;uiversion=2&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;gco_useFirstColumnAsDomain=true&amp;gco_is3D=false&amp;gco_pieHole=0.25&amp;gco_booleanRole=certainty&amp;gco_colors=%5B%22%233366CC%22%2C%22%23DC3912%22%2C%22%23FF9900%22%2C%22%23109618%22%2C%22%23990099%22%2C%22%230099C6%22%2C%22%23DD4477%22%2C%22%2366AA00%22%2C%22%23B82E2E%22%2C%22%23316395%22%2C%22%23994499%22%2C%22%2322AA99%22%2C%22%23AAAA11%22%2C%22%236633CC%22%2C%22%23E67300%22%2C%22%238B0707%22%2C%22%23651067%22%2C%22%23329262%22%2C%22%235574A6%22%2C%22%233B3EAC%22%2C%22%23B77322%22%2C%22%2316D620%22%2C%22%23B91383%22%2C%22%23F4359E%22%2C%22%239C5935%22%2C%22%23A9C413%22%2C%22%232A778D%22%2C%22%23668D1C%22%2C%22%23BEA413%22%2C%22%230C5922%22%2C%22%23743411%22%5D&amp;gco_hAxis=%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D&amp;gco_vAxes=%5B%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%2C%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%5D&amp;gco_title=Percentage+By+Media&amp;gco_legend=right&amp;width=800&amp;height=1000"></iframe>
-  			</div>
   			
-  		
+  			<hr>
+  			<div class="hide_scroll1">	
+				<div id="media_pie_chart" style="width: 900px; height: 500px"></div>
+  			</div>
   			
   			<hr />
  	
