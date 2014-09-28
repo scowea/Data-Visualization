@@ -264,9 +264,14 @@ $(document).ready(function(){
 	            }
 	        },
 	        series: [{
-	            name: 'Photos',
-	            data: year_data_arr 
-	        }]
+	            name: 'Number of Obamicons',
+	            data: year_data_arr, 
+	            events : {
+	            	legendItemClick: function () {
+	            		return false;
+	            	}
+	            }
+	        }],
 	    }); // end $('#yearly_chart').highcharts({
 		$('#yearly_chart').append('<hr>');
 		
@@ -287,12 +292,25 @@ $(document).ready(function(){
 	            }
 	        },
 	        series: [{
-	            name: 'Photos',
-	            data: month_data_arr 
-	        }]
+	            name: 'Number of Obamicons',
+	            data: month_data_arr,
+	            events : {
+	            	legendItemClick: function () {
+	            		return false;
+	            	}
+	            } 
+	        }],
+	        point: {
+	        	events: {
+	        		legendItemClick: function () {
+	        			return false;
+	        		}
+	        	}
+	        }
 	    }); // end $('#monthly_chart').highcharts({
-		$('#monthly_chart').append('<sub>* Obama elected: November 4, 2008<br>* Sworn into office: January 20, 2009</sub>');
+		$('#monthly_chart').append("<sub>* Obama elected: November 4, 2008<br>* Obama's first Inauguration: January 20, 2009<br>* Obama elected second term: November 6, 2012<br>* Obama’s 2nd Inauguration: January 21, 2013</sub>");
 		
+		// </sub>
 		//...............................................
 		/*
 		$('#january_2009_chart').highcharts({
