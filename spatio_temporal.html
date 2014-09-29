@@ -106,9 +106,6 @@ $(document).ready(function(){
 	var mapOptions = { zoom: 2, center: myLatlng, mapTypeId: google.maps.MapTypeId.SATELLITE };// satillite view
 	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);    
 	
-	var map_animateLatlng = new google.maps.LatLng(27.793756, -96.149808);//(38.89808,-77.036523);
-	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
-	map_animate = new google.maps.Map(document.getElementById("map-animate"), map_animateOptions);    
 	 		
     // get the data from flickr
     // see how many pages of photos we have...
@@ -250,16 +247,6 @@ $(document).ready(function(){
 	  						//shadow: 'http://www.mysite.com/markershadow.png'
 						});
 						
-						var marker_animate = new google.maps.Marker({
-					    	position: myLatlng,
-					      	map: map_animate,
-					    	title: jQuery.trim(this_photo.gsx$description.$t),
-					     	visible: true,
-	  						clickable: true,
-	  						icon: './docs-assetts/small_dot.png'
-	  					//	zIndex: count // puts the newest thumbnails on top of the stack
-	  						//shadow: 'http://www.mysite.com/markershadow.png'
-						});
 						
 						var infowindow_html = '<h3>'+this_photo.gsx$description.$t+'</h3>';
 						infowindow_html += '<img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br><br>';
@@ -280,9 +267,6 @@ $(document).ready(function(){
 	      					content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
 	  					});
 	
-						var infowindow_animate = new google.maps.InfoWindow({
-	      					content: infowindow_html 
-	  					});
 	  					
 	  					google.maps.event.addListener(marker, 'click', function() {
 	  						if (prev_infowindow) { prev_infowindow.close();} // close any other infowindows that happen to be open
@@ -291,15 +275,6 @@ $(document).ready(function(){
 	    					infowindow.open(map,marker);
 	  					});
 	  					
-	  					google.maps.event.addListener(marker_animate, 'click', function() {
-	  						if (prev_infowindow_animate) { prev_infowindow_animate.close();} // close any other infowindows that happen to be open
-	  						prev_infowindow_animate = infowindow_animate;
-	  						
-	  						//var infowindow_animate = new google.maps.InfoWindow({
-	      					//	content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
-	  						//});
-	    					infowindow_animate.open(map_animate,marker_animate);
-	  					});
 	  					
 	  					lat_lng_counter++;
 	  					$("#num_plotted_images").html('Photos With Coordinates: <b>' + lat_lng_counter + '</b>');
@@ -395,14 +370,6 @@ function changeRadius() {
   heatmap.set('radius', heatmap.get('radius') ? null : 20);
 }
 
-function start_timer() {
-	
-}
-
-function stop_timer() {
-	
-	
-}
 
 //#####################################################################################
 
@@ -458,8 +425,14 @@ function stop_timer() {
        		<h2>Spatio-Temporal Maps</h2>		 
 	
 			<p>This set of maps indicates the places to which Obama Hope has circulated both within and beyond the U.S. border. Like other geographic information, these maps consists of two components: a spatial component, such as a city, street, or business name, and a thematic component, which assigns some attribute to that location (Lancaster). Yet Maps 2 and 3 also incorporate a temporal dimension in order to gain a sense of how Obama Hope circulated spatially in time as well as the rate of its uptake across the world. By finding correlations between space, time, and thematic information then, we are able to disover...</p>
-			
-			<p>The first is a heat map, showing where and when the image showed up across the world.  You can zoom in on cities such as Log Angeles where many sightings of the image were documented.</p>
+		
+		
+			<p> To get idea of how the obama hope image circulated, although this story can’t be told, I entered in chronological dates where image showed up on heat map. Viewers can click on “Play/Pause” and see how it moved.</p>
+<iframe width='100%' height='520' frameborder='0' src='http://scott-the-weaver.cartodb.com/viz/c7487258-4766-11e4-a794-0e853d047bba/embed_map' allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+	
+			<hr />
+       		
+			<p>The second is a heat map, showing where and when the image showed up across the world.  You can zoom in on cities such as Log Angeles where many sightings of the image were documented.</p>
 			
 			<div id="flickr_count"></div>
 			<div id="num_plotted_images"></div><br>
@@ -469,11 +442,12 @@ function stop_timer() {
 
   			<div id="map-canvas" width="100%" height="500px"></div>
   			  
-       		<hr />
-       		<p> To get idea of how the obama hope image circulated, although this story can’t be told, I entered in chronological dates where image showed up on heat map. Viewers can click on “Start” and see how it moved.</p>
+       			
 			
+		
 			
-			<iframe width='100%' height='520' frameborder='0' src='http://scott-the-weaver.cartodb.com/viz/c7487258-4766-11e4-a794-0e853d047bba/embed_map' allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+					
+		
   				<hr />		
 			<p>
 			<a class="btn btn-success btn-lg" role="button" href="genre.html" >Continue &raquo; Genre</a>
