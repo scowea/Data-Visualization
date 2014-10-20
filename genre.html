@@ -2,13 +2,14 @@
 <!-- 
 Author: Scott M Weaver
 Date: 2014-02-01	
+								GENRE PAGE
 -->
 <html lang="en">
  	<head>
-  		<title>Visualizing Hope</title>
-  		<meta charset="utf-8">
+  	<title>Visualizing Hope</title>
+  	<meta charset="utf-8">
 		
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     	<meta name="viewport" content="width=device-width, initial-scale=1.0">
  
     	<link rel="icon" type="image/x-icon" href="favicon.ico" />
@@ -17,62 +18,48 @@ Date: 2014-02-01
     	<link href="css/jumbotron.css" rel="stylesheet">
     	<link href="css/googlemap.css" rel="stylesheet">
     
- 		<script src="js/jquery.min.js"></script>
+ 	<script src="js/jquery.min.js"></script>
 				
-		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=visualization"></script>
-		<script src="http://code.highcharts.com/highcharts.js"></script>
-		<script src="http://code.highcharts.com/modules/exporting.js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=visualization"></script>
+	<script src="http://code.highcharts.com/highcharts.js"></script>
+	<script src="http://code.highcharts.com/modules/exporting.js"></script>
 		
 <script>
 // create the map 
-
 function initialize() {
-  
- 
-  	
-  	// mark the spot
-	//var firstmarker = new google.maps.Marker({
-    //	position: myLatlng,
-    //  	map: map,
-    //  	title: 'The White House'
-	//});
-	
-	
-	
-
-	
 } // end function initialize() {
-
-
-
- 	     
-	
-
-
-
-
-
 </script>
-	<script>
+
+<script>
 //#####################################################################################
 	
 var gmarkers = [];	
 var marker_colors = ['FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','dc143c'];
 var color_arr = [];
 var lat_lng_counter = 0;
+var cat_count_per_year_arr = new Array();
+var years_arr = new Array();
+var years_arr_counter = 0;
 
 $(document).ready(function(){
+
+
+	var month = "";
+	var day = "";	
+	var year = "";
 	
 	count_per_year_arr = new Array();
 	year_labels_arr = new Array();
 	year_data_arr = new Array();
 	year_arr_index = 0;
 	   
-	
+	var total_years = 0;
 	
 	cat_arr = new Array();
+	cat2_arr = new Array();
 	alpha_cat_arr = new Array();
 	cat_counter = 0;
+	cat2_counter = 0;
 	
 
 	
@@ -88,6 +75,11 @@ $(document).ready(function(){
 	day_data_arr = new Array();
 	day_arr_index = 0;
 	
+	var currentYear = (new Date).getFullYear();
+	$("#currentYear").text(currentYear);
+
+	
+
 	count = 0;
 	percentage_loaded = 0;
 	google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
@@ -127,6 +119,150 @@ $(document).ready(function(){
 	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
 	map_animate = new google.maps.Map(document.getElementById("genre-map"), map_animateOptions);    
 	  	
+
+	//****************************************************************************
+	// GATHER THE DATA FOR THE PIE CHART..
+	//***************************************
+	$.getJSON(apiurl_specific_sheet,function(json){
+    
+	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
+	   
+	    // total of all photos across all pages
+	    total_photos = json.feed.openSearch$totalResults.$t;
+	         
+	    // initialize the counter     
+	    count = 0;
+	    		
+		// get each photo info..
+		$.each(json.feed.entry,function(i,this_photo){
+			
+			//"gsx$genretype" : { "$t" : "Acrylic" },
+            //"gsx$numitems" : { "$t" : "1" },
+			
+			if ((this_photo.gsx$genretype.$t !== '') && (this_photo.gsx$genretype.$t !== '0'))
+			{
+				// look for the grand total of the counts
+				if (this_photo.gsx$genretype.$t == 'Grand Total')
+				{
+					grand_total = this_photo.gsx$numitems.$t;
+				}
+				else
+				{
+					
+	                // if this genre is not already in the array of genres, then create the checkbox 
+                    if (jQuery.inArray(this_photo.gsx$genretype.$t, cat2_arr) === -1)
+                    {
+                            // load the array
+                            cat2_arr[cat2_counter] = this_photo.gsx$genretype.$t;                                         
+                            cat2_counter++;
+                    }   
+
+	
+					// it needs to end up looking like the following:
+					//percentage_arr[0] = ['fist_genre', 50];
+					//percentage_arr[1] = ['second_genre', 10];
+					//percentage_arr[2] = ['third_genre', 20];
+					//percentage_arr[3] = ['fourth_genre', 8];
+					//percentage_arr[4] = ['fith_genre', 2];
+					
+					counter_arr[count] = [this_photo.gsx$genretype.$t, parseFloat(this_photo.gsx$numitems.$t)];
+					
+					console.debug(this_photo.gsx$genretype.$t+'='+ this_photo.gsx$numitems.$t);									
+					count++; // count each photo as we process it...
+	 		
+				}	
+			} // end if datetaken is blank...
+				  					
+		}); // end $.each(json.photos.photo,function(i,myresult){
+		
+		console.debug("count:" +count);
+		console.debug("grand_total:" +grand_total);
+		console.debug("0:" +counter_arr[0]);
+		console.debug("1:" +counter_arr[1]);
+		console.debug("2:" +counter_arr[2]);
+		console.debug("3:" +counter_arr[3]);
+		console.debug("4:" +counter_arr[4]);
+		console.debug("5:" +counter_arr[5]);
+			
+
+	    //.................................................
+	    // DEBUG
+	    console.debug('YEARLY: yAxis labels = ' + year_labels_arr);
+		console.debug('YEARLY: highcharts data array = ' + year_data_arr);
+	
+
+	
+		//*****************************************************
+		// Radialize the colors to make them gradient
+	    Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function (color) {
+	        return {
+	            radialGradient: { cx: 0.5, cy: 0.3, r: 0.7 },
+	            stops: [
+	                [0, color],
+	                [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
+	            ]
+	        };
+	    });
+		
+		// Build the chart
+	    $('#genre_pie_chart').highcharts({
+	       chart: {
+	            plotBackgroundColor: null,
+	            plotBorderWidth: null,
+	            plotShadow: true
+	        },
+	        title: {
+	            text: '<b>Percentage of Genre</b>'
+	        },
+	        tooltip: {
+	            pointFormat: '{series.name}: <b>{point.percentage:.1f}% ({point.y})</b>'
+	        },
+	        plotOptions: {
+	            pie: {
+	                allowPointSelect: true,
+	                cursor: 'pointer',
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
+			            style: {
+		                	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                },
+	                    connectorColor: 'silver'
+	                }
+	            }
+	        },
+	        series: [{
+	            type: 'pie',
+	            name: 'Percentage of Genre',
+	            data: counter_arr,
+	            showInLegend: true
+	        }],
+	        legend: {
+            	align: 'right',
+            	   layout: 'vertical',
+            	verticalAlign: 'top',
+            	x: 0,
+            	y: 100,
+            	navigation: {
+                	activeColor: '#3E576F',
+                	animation: true,
+                	arrowSize: 12,
+                	inactiveColor: '#CCC',
+                	style: {
+                    	fontWeight: 'bold',
+                    	color: '#333',
+                    	fontSize: '12px'
+                	}
+            	}
+        	},
+	    });
+	     	    
+		  	
+	  	
+	  	
+		  	
+	  	
+	//***************************************************************************************  	
     // get the data from the google spreadsheet
     $.getJSON(apiurl,function(json){
     	
@@ -139,83 +275,123 @@ $(document).ready(function(){
 	    
 	    // total of all photos across all pages
 	    total_photos = json.feed.openSearch$totalResults.$t;
-	    
-		//.............................................................
-		// zero out the day/year/month counters
-		for (this_year = 2006; this_year <= 2014; this_year++)
-		{
-			count_per_year_arr[this_year] = 0;
-				    	
-			for(this_month = 1; this_month <= 12; this_month++)
-			{				
-				count_per_month_arr[this_month+''+this_year] = 0;   		
 
-	    		// only collect the dailydata for january.
-	    		if ((this_year == 2009) && (this_month == 1))
-	    		{  		
-					for(this_day = 1; this_day <= 31; this_day++)
-					{				
-						count_per_day_arr[this_day+''+this_month+''+this_year] = 0;   		
-					} // end for(this_day = 1; this_day <= 12; this_day++)   						   		
-				} // end if ((this_year == 2009) && (this_month == 1))				   						   		
-			} // end for(this_month = 1; this_month <= 12; this_month++)
-		} // end for (this_year = 2006; this_year <= 2014; this_year++)     
-	      		
+		//...............................
+		// get an array of the years so we can deal with this data better below in the for loop
+		years_arr_counter = 0;
+		for (this_year = 2006; this_year <= 2014; this_year++)
+	    {
+			years_arr[this_year] = years_arr_counter;
+			years_arr_counter++;
+		}	
+		
+		total_years = years_arr_counter;
+		
+		//.......................................................
+		// zero out the day/year/month counters for each genre
+		for (i=0; i < cat2_arr.length; i++)
+		{ 
+	        // create an array for this category, with x (years) number of elements
+	        // the following line properly loads the array...
+		//cat_count_per_year_arr[cat2_arr[i]] = new Array(total_years);
+	        // but we want to assign the appropriate object properties that highcharts wants..
+		
+ 		var arr = new Array();
+   
+  		for(var j=0; j < total_years; j++) { 
+     			arr[j] = 0;
+  		}
+
+		var obj = [{ name: cat2_arr[i], data: arr }];
+		cat_count_per_year_arr[cat2_arr[i]] = {name: cat2_arr[i], data: arr}; //new StackedBarChartSeries(cat2_arr[i], total_years);
+
+		                
+		
+	        years_arr_counter = 0;    
+	        for (this_year = 2006; this_year <= 2014; this_year++)
+	        {
+	                	
+				// only zero it out if it hasnt already been incremented..
+				// this is nessisary for the test case of a genre not having any counts in a particular year
+				// if we leave this as null instead of a zero, highcharts will puke on it
+				//if (cat_count_per_year_arr[cat2_arr[i]] = [this_year] == null)
+				//cat_count_per_year_arr[cat2_arr[i]][years_arr_counter] = 0;
+			    //cat_count_per_year_arr[cat2_arr[i]].data[years_arr_counter] = 0;
+				
+				//cat_count_per_year_arr[cat2_arr[i]].data[years_arr_counter]++;
+				years_arr_counter++;
+	                                
+	           // for(this_month = 1; this_month <= 12; this_month++)
+	            //{       
+					                        
+	                //cat_count_per_month_arr[cat2_arr[i]][this_month+''+this_year] = 0;               
+	
+	            //} // end for(this_month = 1; this_month <= 12; this_month++)
+	       	} // end for (this_year = 2006; this_year <= 2014; this_year++)     
+		}  	
+
+	    
 		// get each photo info..
 		$.each(json.feed.entry,function(i,this_photo){
 			
-			count++; // count each photo as we process it...
-			$("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
-			$("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');					
-			$("#status_message").html('<h2>One Moment Please...</h2>');
-			
-			// get the month and year of the date this photo was taken		
-			month = this_photo.gsx$datetaken.$t.substr(0,2);
-			day = this_photo.gsx$datetaken.$t.substr(3,2);
-			year = this_photo.gsx$datetaken.$t.substr(6,4);
-			
-			//console.debug('|'+year+'|');
-			
-			// strip leading zeros from the month or day
-			// EX: datetaken":"2013-11-05 13:28:40
-			if (month.substr(0,1) === '0')
-				month = month.substr(1,1);
-			if (day.substr(0,1) === '0')
-				day = day.substr(1,1);		
-			
-			// increment the counter for the year this photo was taken
-			count_per_year_arr[year]++; 
-			//console.debug(year +' counter'+count_per_year_arr[year]);
-			
-			// increment the counter for the month and year this photo was taken     		
-			count_per_month_arr[month+''+year]++;   		
+///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// is there a date taken? 
+			// gather the data for the "Genre by year/month" Stacked Bar Chart
+ 			if ((this_photo.gsx$datetaken.$t !== '') && 
+                (this_photo.gsx$datetaken.$t.substr(0,2) !== '') && 
+                (this_photo.gsx$datetaken.$t.substr(3,2)) && 
+                (this_photo.gsx$datetaken.$t.substr(6,4)) &&
+ 			    (this_photo.gsx$genre.$t != "")                           
+               )
+            {
+				count++; // count each photo as we process it...
+                $("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
+                $("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');                                  
+                $("#status_message").html('<h2>One Moment Please...</h2>');                        
+                $("#num_obamicons").html('Photos that are Obamicons: <b>' + count + '</b>');    
 
-			// only collect the daily data for january.
-			//if ((year == 2009) && (month == 1))
-			//{
-				// increment the counter for the month and year this photo was taken     		
-				count_per_day_arr[day+''+month+''+year]++;   	   		
-			//}
+                // get the month and year of the date this photo was taken              
+                // format: mm-dd-yyyy
+                month = this_photo.gsx$datetaken.$t.substr(0,2);
+                day = this_photo.gsx$datetaken.$t.substr(3,2);
+                year = this_photo.gsx$datetaken.$t.substr(6,4);
+                
+
+                //console.debug('data:' +month+'-'+day+'-'+year);
+                console.debug('|'+year+'|');
+                                
+                // strip leading zeros from the month or day
+                // EX: datetaken":"2013-11-05 13:28:40
+				if (month.substr(0,1) === '0')
+                	month = month.substr(1,1);
+                if (day.substr(0,1) === '0')
+                        day = day.substr(1,1);          
+                                
+                // increment the counter for the year this photo was taken
+                count_per_year_arr[year]++; 
+                console.debug(year +' counter'+count_per_year_arr[year]);
+                                
+                // increment the counter for the month and year this photo was taken                    
+                count_per_month_arr[month+''+year]++;                   
+
+               	// increment the counter for the month and year this photo was taken                    
+                count_per_day_arr[day+''+month+''+year]++;              
+                        
+				// initialize the arra to zero for this genre and year
+				//if( cat_count_per_year_arr[this_photo.gsx$genre.$t][year] == null )
+				//	cat_count_per_year_arr[this_photo.gsx$genre.$t][year] = 0;
 			
-			/*
-			// calculate the progress bar percentage
-			var progress_bar = document.getElementById('progress-bar');
-			percentage_loaded = (count * 100)/total_photos;
-			progress_bar.style.width = percentage_loaded+'%';
-			progress_bar.style.visibility="hidden";
-			*/
-			// show the ending total count
-			if (count >= (total_photos-250))
-			{
-				$("#status_message").html(''); // clear the status message
-				$("#flickr_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
-				//progress_bar.style.width = '100%';
-				
-				// we are done so hide the progress bar
-				//var progress_bar = document.getElementById('progress-bar');
-				//progress_bar.style.visibility="hidden";
-				
-			} // end if (count >= (total_flickr_photos-250))	  
+				//cat_count_per_year_arr[this_photo.gsx$genre.$t].data[years_arr[year]]++;
+				cat_count_per_year_arr[this_photo.gsx$genre.$t].data[years_arr[year]]++;
+			    
+      			// show status
+                $("#status_message").html(''); // clear the status message
+                $("#genre_barchart_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
+                                                                        
+			} // end if datetaken is blank...
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+			
 			
 			
 			
@@ -332,142 +508,115 @@ $(document).ready(function(){
 				
 			
 		}
-				
+
+
+
+		//.........................................................................
+       		// build the yAxis labels and get data in a format that highcharts likes
+                year_arr_index = 0;
+                month_arr_index = 0;
+                day_arr_index = 0;
+                
+                for (this_year = 2006; this_year <= 2014; this_year++)
+            	{
+                	// year labels...
+                	year_labels_arr[year_arr_index] = this_year;
+                                
+                	// move the counts into the delivery array that highchart wants... index of 0,1,2,3,4,5,6,7,8,etc..
+                	year_data_arr[year_arr_index] = count_per_year_arr[this_year];
+                
+                	for(this_month = 1; this_month <= 12; this_month++)
+                	{       
+                        	// monthly labels...
+                        	month_labels_arr[month_arr_index] = this_month+'-'+this_year;
+                                
+                        	// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
+                        	month_data_arr[month_arr_index] = count_per_month_arr[this_month+''+this_year];
+                                                        
+                        	// increment the monthly index
+  				month_arr_index++;
+
+                	} // end for(this_month = 1; this_month <= 12; this_month++)
+                                
+                	// increment the yearly index
+                	year_arr_index++;
+
+            	} // end for (this_year = 2006; this_year <= 2014; this_year++)
+            
+
+		var blah = cat_count_per_year_arr;
+ 		var stacked_cat_count_per_year_arr = new Array();
+ 		
+ 		for (t = 0; t < cat2_arr.length; t++)
+ 		{
+ 			stacked_cat_count_per_year_arr[t] = cat_count_per_year_arr[cat2_arr[t]];
+ 			
+ 		}
+ 		
+ 		
+		var temp_data =       
+		[{
+                    name: 'Charity Art',
+                    data: [5, 3, 4, 7, 2,3,4,5,6]
+                }, {
+                    name: 'Obamicon',
+                    data: [2, 2, 3, 2, 1,5,6,7,8]
+                }, {
+                    name: 'Political Cartoons',
+                    data: [3, 4, 4, 2, 5,6,7,8,9]
+                }];
+
+		var series_data = stacked_cat_count_per_year_arr; //temp_data;
+
+		//********************************************
+		 $('#stacked_bar_chart_yearly').highcharts({
+	        chart: {
+	            type: 'bar'
+	        },
+	        title: {
+	            text: 'Genre Frequency By Year'
+	        },
+	        xAxis: {
+	            categories: year_labels_arr //['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
+	        },
+	        yAxis: {
+	            min: 0,
+	            title: {
+	                text: 'Total Photos'
+	            }
+	        },
+	        legend: {
+	            reversed: true
+	        },
+	        plotOptions: {
+	            series: {
+	                stacking: 'normal'
+	            }
+	        },
+	        series: series_data 
+	  /*      
+		[{
+	            name: 'Charity Art',
+	            data: [5, 3, 4, 7, 2,3,4,5,6]
+	        }, {
+	            name: 'Obamicon',
+	            data: [2, 2, 3, 2, 1,5,6,7,8]
+	        }, {
+	            name: 'Political Cartoons',
+	            data: [3, 4, 4, 2, 5,6,7,8,9]
+	        }]
+	*/	
+	    });
+
+
+	}); // end getJson()			
 	}); // end $.getJSON(apiurl,function(json){   
 
 
 	google.maps.event.addDomListener(window, 'load', initialize);
 	
-	//****************************************************************************
-	// GATHER THE DATA FOR THE PIE CHART..
-	//***************************************
-	$.getJSON(apiurl_specific_sheet,function(json){
-    
-	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
-	   
-	    // total of all photos across all pages
-	    total_photos = json.feed.openSearch$totalResults.$t;
-	         
-	    // initialize the counter     
-	    count = 0;
-	    		
-		// get each photo info..
-		$.each(json.feed.entry,function(i,this_photo){
-			
-			//"gsx$genretype" : { "$t" : "Acrylic" },
-            //"gsx$numitems" : { "$t" : "1" },
-			
-			if ((this_photo.gsx$genretype.$t !== '') )
-			{
-				// look for the grand total of the counts
-				if (this_photo.gsx$genretype.$t == 'Grand Total')
-				{
-					grand_total = this_photo.gsx$numitems.$t;
-				}
-				else
-				{
-					
 	
-					// it needs to end up looking like the following:
-					//percentage_arr[0] = ['fist_genre', 50];
-					//percentage_arr[1] = ['second_genre', 10];
-					//percentage_arr[2] = ['third_genre', 20];
-					//percentage_arr[3] = ['fourth_genre', 8];
-					//percentage_arr[4] = ['fith_genre', 2];
-					
-					counter_arr[count] = [this_photo.gsx$genretype.$t, parseFloat(this_photo.gsx$numitems.$t)];
-					
-					console.debug(this_photo.gsx$genretype.$t+'='+ this_photo.gsx$numitems.$t);									
-					count++; // count each photo as we process it...
-	 		
-				}	
-			} // end if datetaken is blank...
-				  					
-		}); // end $.each(json.photos.photo,function(i,myresult){
-		
-		console.debug("count:" +count);
-		console.debug("grand_total:" +grand_total);
-		console.debug("0:" +counter_arr[0]);
-		console.debug("1:" +counter_arr[1]);
-		console.debug("2:" +counter_arr[2]);
-		console.debug("3:" +counter_arr[3]);
-		console.debug("4:" +counter_arr[4]);
-		console.debug("5:" +counter_arr[5]);
-			
-
-	    //.................................................
-	    // DEBUG
-	    console.debug('YEARLY: yAxis labels = ' + year_labels_arr);
-		console.debug('YEARLY: highcharts data array = ' + year_data_arr);
 	
-
-	
-		//*****************************************************
-		// Radialize the colors to make them gradient
-	    Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function (color) {
-	        return {
-	            radialGradient: { cx: 0.5, cy: 0.3, r: 0.7 },
-	            stops: [
-	                [0, color],
-	                [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
-	            ]
-	        };
-	    });
-		
-		// Build the chart
-	    $('#genre_pie_chart').highcharts({
-	       chart: {
-	            plotBackgroundColor: null,
-	            plotBorderWidth: null,
-	            plotShadow: true
-	        },
-	        title: {
-	            text: '<b>Percentage of Genre</b>'
-	        },
-	        tooltip: {
-	            pointFormat: '{series.name}: <b>{point.percentage:.1f}% ({point.y})</b>'
-	        },
-	        plotOptions: {
-	            pie: {
-	                allowPointSelect: true,
-	                cursor: 'pointer',
-	                dataLabels: {
-	                    enabled: true,
-	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
-			            style: {
-		                	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-		                },
-	                    connectorColor: 'silver'
-	                }
-	            }
-	        },
-	        series: [{
-	            type: 'pie',
-	            name: 'Percentage of Genre',
-	            data: counter_arr,
-	            showInLegend: true
-	        }],
-	        legend: {
-            	align: 'right',
-            	   layout: 'vertical',
-            	verticalAlign: 'top',
-            	x: 0,
-            	y: 100,
-            	navigation: {
-                	activeColor: '#3E576F',
-                	animation: true,
-                	arrowSize: 12,
-                	inactiveColor: '#CCC',
-                	style: {
-                    	fontWeight: 'bold',
-                    	color: '#333',
-                    	fontSize: '12px'
-                	}
-            	}
-        	},
-	    });
-	     	    
-	}); // end getJson()
 	
 }); // end $(document).ready(function(){
 
@@ -559,6 +708,28 @@ function compareSecondColumn(a, b) {
         return (a[1] < b[1]) ? -1 : 1;
     }
 }
+
+function StackedBarChartSeries(name, num_years) {
+  	
+ 	
+  var arr = new Array();
+   
+  for(var i=0; i < num_years; i++) { 
+     arr[i] = 0;
+  }
+
+  this.name = name;
+  this.data = arr;
+
+}
+
+function CreateSeriesArray(num_years)
+{
+	var arr = new Array(num_years);
+	for(i=0; i < num_years; i++)
+		arr[i] = 0;
+	return arr;
+}
 //#####################################################################################
 
 
@@ -626,7 +797,10 @@ I also created a Genre History Map to see if there was a chronological different
 <div id="genre_pie_chart" style="width: 900px; height: 500px"></div>
   			
   		<hr>
-  				
+  		<div id="stacked_bar_chart_yearly"></div>
+
+  		
+  		<hr>		
 		  	<p>
 				<a class="btn btn-success btn-lg" role="button" href="media.html" >Continue &raquo; Media</a>
 			</p>
