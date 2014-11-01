@@ -24,45 +24,142 @@ Date: 2014-02-01
 		<script src="http://code.highcharts.com/modules/exporting.js"></script>
 		
 <script>
-// create the map 
-
 function initialize() {
-  
- 
-  	
-  	// mark the spot
-	//var firstmarker = new google.maps.Marker({
-    //	position: myLatlng,
-    //  	map: map,
-    //  	title: 'The White House'
-	//});
-	
-	
-	
-
-	
 } // end function initialize() {
-
-
-
- 	     
-	
-
-
-
-
-
 </script>
 
 <script>
 //#####################################################################################
 	
 var gmarkers = [];	
-var marker_colors = ['FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','A52A2A','dc143c','FF0000',,'FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','dc143c'];
+/*
+var color_palette_hex = [
+'#eeeeee',// 1. light grey
+'#aaaaaa', //24   med grey 
+
+'#595959',// 10. dark grey
+
+'#7a643b',// 26. light brown
+'#a95000',// 8. brown
+'#000000',// 5. black
+
+'#25c3ff',// 2. light blue
+'#9ac1d0',// 15. light/med blue
+'#385698',// 25. med blue
+'#1869c5',// 19. royal blue
+'#304376',// 14. dull dark blue
+
+
+
+
+'#c6efa8',// 27. light green
+'#00ff38',// 3. bright green
+'#16a111',// 20. med green
+'#51a176',// 13. light/med green
+'#195e36',// 12. dark green
+
+'#f0f20e',// 6. yellow
+'#f1bd00',// 18. dark yellow
+
+'#ff9429',// 4. orange
+'#ff6600',// 23. orange
+
+'#ff0000',// 7. red
+'#b00007',// 17. dark red
+'#ff00e7',// 16. pink
+
+'#9f8fe7',// 11. light purple
+'#9426b2',// 21. med purple
+'#582268',// 9. purple
+'#4020d0',// 22. dark purple/blue
+
+
+'',// 29.
+'',// 30.
+'',// 31.
+'',// 32.
+'',// 33.
+'',// 34.
+'',// 35.
+''// 36.
+];
+*/
+var color_palette_hex = [
+
+
+// blue colors
+'#87cefa',// 26. light sky blue
+'#1e90ff',// 27. doger blue
+'#0000ff',// 28. blue
+'#000080',// 29. navy
+
+// orange colors
+'#ff4500',// 9. orange red
+'#ffa500',// 10. orange
+
+// green colors
+'#00ff00',// 18. lime 
+'#90ee90',// 19. light green
+'#228b22',// 20. forest green
+'#006400',// 21. dark green
+
+ // red colors
+'#ffa07a',// 5. light salmon
+'#f08080',// 6. light coral
+'#8b0000',// 7. dark red
+'#ff0000',// 8. red
+
+// yellow colors
+'#ffff00',// 11. yellow
+'#bdb7b6',// 12. dark khaki
+'#ffd700',// 13. gold
+
+// brown colors
+'#f5deb3',// 14. wheat
+'#d2b48c',// 15. tan
+'#cd853f',// 16. peru 
+'#8b4513',// 17. saddlebrown
+
+// pink colors
+'#ffc0cb',//1. pink
+'#ff69b4',//2. hotpink
+'#ff1493',//3. deep pink 
+'#c71585',//4. med violet red
+ 
+
+
+
+// cyan colors
+'#00ffff',// 22. cyan
+'#afeeee',// 23. pale turquoise
+'#7fffd4',// 24. aquamarine
+'#48d1cc',// 25. med torquoise
+
+
+// purple colors
+'#ff00ff',// 30. fuchsia
+'#9370db',// 31. med purple
+'#4b0082',// 32. indigo
+
+// white gray/black colors
+'#d3d3d3',// 33. light grey
+'#a9a9a9',// 34. dark gray
+'#696969',// 35. dim gray
+'#000000',// 36. black  
+];
+
+
+
+var color_palette_nohex = [];
 var color_arr = [];
 var lat_lng_counter = 0;
 
 $(document).ready(function(){
+	
+	for (var i=0; i < color_palette_hex.length; i++)
+	{
+		color_palette_nohex[i] = color_palette_hex[i].replace('#','');
+	}	
 	
 	count_per_year_arr = new Array();
 	year_labels_arr = new Array();
@@ -246,9 +343,9 @@ $(document).ready(function(){
 						
 					// load the array so we know we already created this checkbox the next loop iteration
 					cat_arr[cat_counter] = this_photo.gsx$media.$t;
-					color_arr["'" + this_photo.gsx$media.$t + "'"] = marker_colors[cat_counter];
+					color_arr["'" + this_photo.gsx$media.$t + "'"] = color_palette_nohex[cat_counter];
 				
-					alpha_cat_arr[cat_counter] = [this_photo.gsx$media.$t, marker_colors[cat_counter]];
+					alpha_cat_arr[cat_counter] = [this_photo.gsx$media.$t, color_palette_nohex[cat_counter]];
 				
 					cat_counter++;
 				
@@ -469,7 +566,10 @@ $(document).ready(function(){
 	    //   ['Others',   0.7]
 	    //]
 		
-		
+		Highcharts.setOptions({
+        	colors: color_palette_hex 
+    	});
+				
 		// Build the chart
 	    $('#media_pie_chart').highcharts({
 	       chart: {
@@ -490,9 +590,9 @@ $(document).ready(function(){
 	                dataLabels: {
 	                    enabled: true,
 	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
-			            style: {
-		                	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-		                },
+			            //style: {
+		                //	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                //},
 	                    connectorColor: 'silver'
 	                }
 	            }

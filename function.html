@@ -24,51 +24,32 @@ Date: 2014-02-01
 		<script src="http://code.highcharts.com/modules/exporting.js"></script>
 		
 <script>
-// create the map 
-
 function initialize() {
-  
- 
-  	
-  	// mark the spot
-	//var firstmarker = new google.maps.Marker({
-    //	position: myLatlng,
-    //  	map: map,
-    //  	title: 'The White House'
-	//});
-	
-	
-	
-
-	
 } // end function initialize() {
-
-
-
- 	     
-	
-
-
-
-
-
 </script>
-	<script>
+	
+<script>
 //#####################################################################################
 	
 var gmarkers = [];	
-var marker_colors = ['FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','A52A2A','dc143c','FF0000',,'FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','dc143c'];
+var color_palette_hex = ['#eeeeee','#25c3ff','#00ff38','#ff9429','#000000','#f0f20e','#ff0000','#a95000','#582268','#595959','#9f8fe7','#195e36','#51a176','#304376','#9ac1d0','#ff00e7','#b00007','#f1bd00','#1869c5','#16a111','#9426b2','#4020d0'];
+var color_palette_nohex = [];
 var color_arr = [];
 var lat_lng_counter = 0;
 
+
+
 $(document).ready(function(){
+	
+	for (var i=0; i < color_palette_hex.length; i++)
+	{
+		color_palette_nohex[i] = color_palette_hex[i].replace('#','');
+	}	
 	
 	count_per_year_arr = new Array();
 	year_labels_arr = new Array();
 	year_data_arr = new Array();
 	year_arr_index = 0;
-	   
-	
 	
 	cat_arr = new Array();
 	alpha_cat_arr = new Array();
@@ -247,9 +228,9 @@ $(document).ready(function(){
 						
 					// load the array so we know we already created this checkbox the next loop iteration
 					cat_arr[cat_counter] = this_photo.gsx$function.$t;
-					color_arr["'" + this_photo.gsx$function.$t + "'"] = marker_colors[cat_counter];
+					color_arr["'" + this_photo.gsx$function.$t + "'"] = color_palette_nohex[cat_counter];
 
-					alpha_cat_arr[cat_counter] = [this_photo.gsx$function.$t, marker_colors[cat_counter]];
+					alpha_cat_arr[cat_counter] = [this_photo.gsx$function.$t, color_palette_nohex[cat_counter]];
 						
 					cat_counter++;
 				
@@ -400,17 +381,10 @@ $(document).ready(function(){
 	
 
 	
-		//*****************************************************
-		// Radialize the colors to make them gradient
-	    Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function (color) {
-	        return {
-	            radialGradient: { cx: 0.5, cy: 0.3, r: 0.7 },
-	            stops: [
-	                [0, color],
-	                [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
-	            ]
-	        };
-	    });
+		//****************************************************
+		Highcharts.setOptions({
+        	colors: color_palette_hex 
+    	});
 		
 		// Build the chart
 	    $('#function_pie_chart').highcharts({
@@ -432,9 +406,9 @@ $(document).ready(function(){
 	                dataLabels: {
 	                    enabled: true,
 	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
-			            style: {
-		                	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-		                },
+			            //style: {
+		                //	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                //},
 	                    connectorColor: 'silver'
 	                }
 	            }

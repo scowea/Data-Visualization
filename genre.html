@@ -34,14 +34,22 @@ function initialize() {
 //#####################################################################################
 	
 var gmarkers = [];	
-var marker_colors = ['FFFFFF','808080','000000','000080','084c9e', '0000cd','007fff','00ffff','7fffd4','008080','228b22','808000','7fff00','bfff00','ffd700','daa520','ff7f50','fa8072','fc0fc0','ff77ff','cc8899','e0b0ff','b57edc','843179','4b0082','800000','dc143c'];
+var color_palette_hex = ['#eeeeee','#25c3ff','#00ff38','#ff9429','#000000','#f0f20e','#ff0000','#a95000','#582268','#595959','#9f8fe7','#195e36','#51a176','#b03030','#304376','#9ac1d0','#ff00e7','#b00007','#f1bd00','#1869c5','#16a111','#9426b2','#4020d0'];
+var color_palette_nohex = [];
 var color_arr = [];
+
 var lat_lng_counter = 0;
 var cat_count_per_year_arr = new Array();
 var years_arr = new Array();
 var years_arr_counter = 0;
 
 $(document).ready(function(){
+
+
+	for (var i=0; i < color_palette_hex.length; i++)
+	{
+		color_palette_nohex[i] = color_palette_hex[i].replace('#','');
+	}
 
 
 	var month = "";
@@ -204,6 +212,10 @@ $(document).ready(function(){
 	        };
 	    });
 		
+		Highcharts.setOptions({
+        	colors: color_palette_hex 
+    	});
+		
 		// Build the chart
 	    $('#genre_pie_chart').highcharts({
 	       chart: {
@@ -224,9 +236,9 @@ $(document).ready(function(){
 	                dataLabels: {
 	                    enabled: true,
 	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
-			            style: {
-		                	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-		                },
+			            //style: {
+		               // 	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                //},
 	                    connectorColor: 'silver'
 	                }
 	            }
@@ -423,9 +435,9 @@ $(document).ready(function(){
 						
 					// load the array so we know we already created this checkbox the next loop iteration
 					cat_arr[cat_counter] = this_photo.gsx$genre.$t;
-					color_arr["'" + this_photo.gsx$genre.$t + "'"] = marker_colors[cat_counter];
+					color_arr["'" + this_photo.gsx$genre.$t + "'"] = color_palette_nohex[cat_counter];
 				
-					alpha_cat_arr[cat_counter] = [this_photo.gsx$genre.$t, marker_colors[cat_counter]];
+					alpha_cat_arr[cat_counter] = [this_photo.gsx$genre.$t, color_palette_nohex[cat_counter]];
 				
 					cat_counter++;
 					
@@ -568,6 +580,10 @@ $(document).ready(function(){
 
 		var series_data = stacked_cat_count_per_year_arr; //temp_data;
 
+   		Highcharts.setOptions({
+        	colors: color_palette_hex 
+    	});
+    	
 		//********************************************
 		 $('#stacked_bar_chart_yearly').highcharts({
 	        chart: {
