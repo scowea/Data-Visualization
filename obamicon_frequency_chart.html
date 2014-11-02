@@ -45,21 +45,34 @@ percentage_loaded = 0;
 google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
 //apiurl = "http://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken";
 
-//apiurl = "https://spreadsheets.google.com/feeds/list/1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U/od6/public/values?alt=json-in-script&callback=x";
-apiurl = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/od6/public/values?alt=json";
-apiurl_html = "https://docs.google.com/spreadsheets/d/"+google_spreadsheet_id+"/pubhtml";
-//apiurl = "http://cors.io/spreadsheets.google.com/feeds/list/1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U/od6/public/values?alt=json";
-
-
 // TEMPORARY: UNTIL WE COMBINE THE TWO SPREADSHEETS
 obamicon_google_spreadsheet_id = '1uZOgUznKuyVWFR_vcvSCLnBYSJ4jxpMDGROQC9nNjuM'; 
 obamicon_sheet_id = 'oisw0ui'; // function pivot table
 obamicon_apiurl_specific_sheet = "https://spreadsheets.google.com/feeds/list/"+obamicon_google_spreadsheet_id+"/"+obamicon_sheet_id+"/public/values?alt=json";
 
-var grand_total = 0;
-var percentage_arr = new Array();
-var counter_arr = new Array();
+obamicon_google_spreadsheet_id = '1uZOgUznKuyVWFR_vcvSCLnBYSJ4jxpMDGROQC9nNjuM'; 
+characters_depicted_sheet_id = 'o9mdvzt'; // function pivot table
+characters_depicted_apiurl_specific_sheet = "https://spreadsheets.google.com/feeds/list/"+obamicon_google_spreadsheet_id+"/"+characters_depicted_sheet_id+"/public/values?alt=json";
 
+
+
+//apiurl = "https://spreadsheets.google.com/feeds/list/1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U/od6/public/values?alt=json-in-script&callback=x";
+apiurl = "https://spreadsheets.google.com/feeds/list/"+obamicon_google_spreadsheet_id+"/od6/public/values?alt=json";
+apiurl_html = "https://docs.google.com/spreadsheets/d/"+obamicon_google_spreadsheet_id+"/pubhtml";
+//apiurl = "http://cors.io/spreadsheets.google.com/feeds/list/1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U/od6/public/values?alt=json";
+
+
+
+
+var function_grand_total = 0;
+var function_total_photos = 0;
+var function_percentage_arr = new Array();
+var function_counter_arr = new Array();
+
+var characters_grand_total = 0;
+var characters_total_photos = 0;
+var characters_percentage_arr = new Array();
+var characters_counter_arr = new Array();
 
 //Key:dd4eb2f7ebff37400f01aae57493f41e
 //Secret:7a6541283f6e96bf
@@ -122,19 +135,19 @@ $(document).ready(function(){
 					
 					if ((this_photo.gsx$datetaken.$t !== '') && 
 						(this_photo.gsx$datetaken.$t.substr(0,2) !== '') && 
-						(this_photo.gsx$datetaken.$t.substr(3,2)) && 
-						(this_photo.gsx$datetaken.$t.substr(6,4)) &&
-						(this_photo.gsx$isobamacon.$t == 'YES')
+						(this_photo.gsx$datetaken.$t.substr(3,2) !== '') && 
+						(this_photo.gsx$datetaken.$t.substr(6,4) !== '') //&&
+						//(this_photo.gsx$isobamacon.$t == 'YES')
 					)
 					{
 						count++; // count each photo as we process it...
-						$("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
+						//$("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
 						$("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');					
 						$("#status_message").html('<h2>One Moment Please...</h2>');
 						
 						
 
-						$("#num_obamicons").html('Photos that are Obamicons: <b>' + count + '</b>');	
+						$("#num_obamicons").html('Photos that have a Time Stamp: <b>' + count + '</b>');	
 
 						
 						// get the month and year of the date this photo was taken		
@@ -356,15 +369,16 @@ $(document).ready(function(){
 
 	 }); // end $.getJSON(apiurl,function(json){
 	
-		//****************************************************************************
+	//****************************************************************************
 	// GATHER THE DATA FOR THE PIE CHART..
 	//***************************************
+	//characters_depicted_apiurl_specific_sheet
 	$.getJSON(obamicon_apiurl_specific_sheet,function(json){
     
 	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
 	   
 	    // total of all photos across all pages
-	    total_photos = json.feed.openSearch$totalResults.$t;
+	    function_total_photos = json.feed.openSearch$totalResults.$t;
 	         
 	    // initialize the counter     
 	    count = 0;
@@ -380,7 +394,7 @@ $(document).ready(function(){
 				// look for the grand total of the counts
 				if (this_photo.gsx$functiontype.$t == 'Grand Total')
 				{
-					grand_total = this_photo.gsx$numitems.$t;
+					function_grand_total = this_photo.gsx$numitems.$t;
 				}
 				else
 				{
@@ -391,7 +405,7 @@ $(document).ready(function(){
 					//percentage_arr[3] = ['fourth_genre', 8];
 					//percentage_arr[4] = ['fith_genre', 2];
 					
-					counter_arr[count] = [this_photo.gsx$functiontype.$t, parseFloat(this_photo.gsx$numitems.$t)];
+					function_counter_arr[count] = [this_photo.gsx$functiontype.$t, parseFloat(this_photo.gsx$numitems.$t)];
 					
 					console.debug(this_photo.gsx$functiontype.$t+'='+ this_photo.gsx$numitems.$t);									
 					count++; // count each photo as we process it...
@@ -401,13 +415,13 @@ $(document).ready(function(){
 		}); // end $.each(json.photos.photo,function(i,myresult){
 		
 		console.debug("count:" +count);
-		console.debug("grand_total:" +grand_total);
-		console.debug("0:" +counter_arr[0]);
-		console.debug("1:" +counter_arr[1]);
-		console.debug("2:" +counter_arr[2]);
-		console.debug("3:" +counter_arr[3]);
-		console.debug("4:" +counter_arr[4]);
-		console.debug("5:" +counter_arr[5]);
+		//console.debug("grand_total:" +grand_total);
+		//console.debug("0:" +counter_arr[0]);
+		//console.debug("1:" +counter_arr[1]);
+		//console.debug("2:" +counter_arr[2]);
+		//console.debug("3:" +counter_arr[3]);
+		//console.debug("4:" +counter_arr[4]);
+		//console.debug("5:" +counter_arr[5]);
 			
 
 	    //.................................................
@@ -452,7 +466,7 @@ $(document).ready(function(){
 	        series: [{
 	            type: 'pie',
 	            name: 'Percentage of Function',
-	            data: counter_arr,
+	            data: function_counter_arr,
 	            showInLegend: true
 	        }],
 	        legend: {
@@ -477,6 +491,122 @@ $(document).ready(function(){
 	     	    
 	}); // end getJson()
 	
+//****************************************************************************
+	// GATHER THE DATA FOR THE PIE CHART..
+	//***************************************
+	//characters_depicted_apiurl_specific_sheet
+	$.getJSON(characters_depicted_apiurl_specific_sheet,function(json){
+    
+	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
+	   
+	    // total of all photos across all pages
+	    characters_total_photos = json.feed.openSearch$totalResults.$t;
+	         
+	    // initialize the counter     
+	    count = 0;
+	    		
+		// get each photo info..
+		$.each(json.feed.entry,function(i,this_photo){
+			
+			//"gsx$functiontype" : { "$t" : "Acrylic" },
+            //"gsx$numitems" : { "$t" : "1" },
+			
+			if ((this_photo.gsx$itemvalue.$t !== '') )
+			{
+				// look for the grand total of the counts
+				if (this_photo.gsx$itemvalue.$t == 'Grand Total')
+				{
+					characters_grand_total = this_photo.gsx$numitems.$t;
+				}
+				else
+				{
+					// it needs to end up looking like the following:
+					//percentage_arr[0] = ['fist_genre', 50];
+					//percentage_arr[1] = ['second_genre', 10];
+					//percentage_arr[2] = ['third_genre', 20];
+					//percentage_arr[3] = ['fourth_genre', 8];
+					//percentage_arr[4] = ['fith_genre', 2];
+					
+					characters_counter_arr[count] = [this_photo.gsx$itemvalue.$t, parseFloat(this_photo.gsx$numitems.$t)];
+					
+					console.debug(this_photo.gsx$itemvalue.$t+'='+ this_photo.gsx$numitems.$t);									
+					count++; // count each photo as we process it...
+				}	
+			} // end if datetaken is blank...
+				  					
+		}); // end $.each(json.photos.photo,function(i,myresult){
+		
+		console.debug("count:" +count);
+		//console.debug("grand_total:" +grand_total);
+		//console.debug("0:" +counter_arr[0]);
+		//console.debug("1:" +counter_arr[1]);
+		//console.debug("2:" +counter_arr[2]);
+		//console.debug("3:" +counter_arr[3]);
+		//console.debug("4:" +counter_arr[4]);
+		//console.debug("5:" +counter_arr[5]);
+			
+	
+		//****************************************************
+		//Highcharts.setOptions({
+        //	colors: color_palette_hex 
+    	//});
+		
+		// Build the chart
+	    $('#characters_depicted_pie_chart').highcharts({
+	       chart: {
+	            plotBackgroundColor: null,
+	            plotBorderWidth: null,
+	            plotShadow: true
+	        },
+	        title: {
+	            text: '<b>Percentage of Obamicons by Characters Depicted</b>'
+	        },
+	        tooltip: {
+	            pointFormat: '{series.name}: <b>{point.percentage:.1f}% ({point.y})</b>'
+	        },
+	        plotOptions: {
+	            pie: {
+	                allowPointSelect: true,
+	                cursor: 'pointer',
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
+			            //style: {
+		                //	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                //},
+	                    connectorColor: 'silver'
+	                }
+	            }
+	        },
+	        series: [{
+	            type: 'pie',
+	            name: 'Percentage of Characters Depicted',
+	            data: characters_counter_arr,
+	            showInLegend: true
+	        }],
+	        legend: {
+            	align: 'right',
+            	   layout: 'vertical',
+            	verticalAlign: 'top',
+            	x: 0,
+            	y: 100,
+            	navigation: {
+                	activeColor: '#3E576F',
+                	animation: true,
+                	arrowSize: 12,
+                	inactiveColor: '#CCC',
+                	style: {
+                    	fontWeight: 'bold',
+                    	color: '#333',
+                    	fontSize: '12px'
+                	}
+            	}
+        	},
+	    });
+	     	    
+	}); // end getJson()
+
+
 	
 	$(window).load(function() {
 					
@@ -557,6 +687,9 @@ $(document).ready(function(){
       		<hr>
       		
       		<div id="function_pie_chart" style="width: 900px; height: 500px"></div>
+      		
+      		<div id="characters_depicted_pie_chart" style="width: 900px; height: 500px"></div>
+  
   			
   			
   	<p>
