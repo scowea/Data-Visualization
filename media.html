@@ -143,10 +143,13 @@ var color_palette_hex = [
 ];
 
 
-
 var color_palette_nohex = [];
 var color_arr = [];
+
 var lat_lng_counter = 0;
+var cat_count_per_year_arr = new Array();
+var years_arr = new Array();
+var years_arr_counter = 0;
 
 $(document).ready(function(){
 	
@@ -159,14 +162,12 @@ $(document).ready(function(){
 	year_labels_arr = new Array();
 	year_data_arr = new Array();
 	year_arr_index = 0;
-	   
-	
 	
 	cat_arr = new Array();
+	cat2_arr = new Array();
 	alpha_cat_arr = new Array();
 	cat_counter = 0;
-	
-
+	cat2_counter = 0;
 	
 	heat_map_data_arr = new Array();   
 	   
@@ -215,219 +216,6 @@ $(document).ready(function(){
 	var map_animateLatlng = new google.maps.LatLng(35.232471, 9.319066);//(38.89808,-77.036523);
 	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
 	map_animate = new google.maps.Map(document.getElementById("genre-map"), map_animateOptions);    
-	  	
-	//jQuery.support.cors = true;  	
-    // get the data from the google spreadsheet
-    $.getJSON(apiurl,function(json){
-  
-    	// show status messages...
-    	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
-    	$("#loading_progressbar").html(percentage_loaded); 
-	    $("#data_source").html("[<a target=_blank href="+apiurl+">Data Source</a>]");
-	    
-	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
-	    
-	    // total of all photos across all pages
-	    total_photos = json.feed.openSearch$totalResults.$t;
-	    
-		//.............................................................
-		// zero out the day/year/month counters
-		for (this_year = 2006; this_year <= 2014; this_year++)
-		{
-			count_per_year_arr[this_year] = 0;
-				    	
-			for(this_month = 1; this_month <= 12; this_month++)
-			{				
-				count_per_month_arr[this_month+''+this_year] = 0;   		
-
-	    		// only collect the dailydata for january.
-	    		if ((this_year == 2009) && (this_month == 1))
-	    		{  		
-					for(this_day = 1; this_day <= 31; this_day++)
-					{				
-						count_per_day_arr[this_day+''+this_month+''+this_year] = 0;   		
-					} // end for(this_day = 1; this_day <= 12; this_day++)   						   		
-				} // end if ((this_year == 2009) && (this_month == 1))				   						   		
-			} // end for(this_month = 1; this_month <= 12; this_month++)
-		} // end for (this_year = 2006; this_year <= 2014; this_year++)     
-	      		
-		// get each photo info..
-		$.each(json.feed.entry,function(i,this_photo){
-			
-			count++; // count each photo as we process it...
-			$("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
-			$("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');					
-			$("#status_message").html('<h2>One Moment Please...</h2>');
-			
-			// get the month and year of the date this photo was taken		
-			month = this_photo.gsx$datetaken.$t.substr(0,2);
-			day = this_photo.gsx$datetaken.$t.substr(3,2);
-			year = this_photo.gsx$datetaken.$t.substr(6,4);
-			
-			//console.debug('|'+year+'|');
-			
-			// strip leading zeros from the month or day
-			// EX: datetaken":"2013-11-05 13:28:40
-			if (month.substr(0,1) === '0')
-				month = month.substr(1,1);
-			if (day.substr(0,1) === '0')
-				day = day.substr(1,1);		
-			
-			// increment the counter for the year this photo was taken
-			count_per_year_arr[year]++; 
-			//console.debug(year +' counter'+count_per_year_arr[year]);
-			
-			// increment the counter for the month and year this photo was taken     		
-			count_per_month_arr[month+''+year]++;   		
-
-			// only collect the daily data for january.
-			//if ((year == 2009) && (month == 1))
-			//{
-				// increment the counter for the month and year this photo was taken     		
-				count_per_day_arr[day+''+month+''+year]++;   	   		
-			//}
-			
-			/*
-			// calculate the progress bar percentage
-			var progress_bar = document.getElementById('progress-bar');
-			percentage_loaded = (count * 100)/total_photos;
-			progress_bar.style.width = percentage_loaded+'%';
-			progress_bar.style.visibility="hidden";
-			*/
-			// show the ending total count
-			if (count >= (total_photos-250))
-			{
-				$("#status_message").html(''); // clear the status message
-				$("#flickr_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
-				//progress_bar.style.width = '100%';
-				
-				// we are done so hide the progress bar
-				//var progress_bar = document.getElementById('progress-bar');
-				//progress_bar.style.visibility="hidden";
-				
-			} // end if (count >= (total_flickr_photos-250))	  
-			
-			
-			
-			//.................
-			// in for loop:
-			var lat = this_photo.gsx$latitude.$t; //this_photo.latitude; 
-			var lng = this_photo.gsx$longitude.$t; //this_photo.longitude;
-			
-			if ((lat != "") && (lng != "") && (this_photo.gsx$media.$t != ""))
-			{
-				
-				// geo code this address
-				//var geocode_url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + this_photo.gsx$address.$t + "&key=" + api_key;
-				//$.getJSON("https://maps.googleapis.com/maps/api/geocode/json?address=" . ,function(json){
-				//https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=API_KEY
-				
-			  	var myLatlng = new google.maps.LatLng(lat,lng);	
-			  					  					
-			  	//var thumbnail = 'http://farm'+ this_photo.farm + '.staticflickr.com/'+ this_photo.server+ '/'+this_photo.id+'_'+this_photo.secret+'_t.jpg';
-			  	var thumbnail = this_photo.gsx$urltojpg.$t;
-			  	// Format: http://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
-			  	// this_photo.secret
-				// this_photo.farm
-				// this_photo.id
-
-				// if this genre is not already in the array of genres, then create the checkbox 
-				if (jQuery.inArray(this_photo.gsx$media.$t, cat_arr) === -1)
-				{
-						
-					// load the array so we know we already created this checkbox the next loop iteration
-					cat_arr[cat_counter] = this_photo.gsx$media.$t;
-					color_arr["'" + this_photo.gsx$media.$t + "'"] = color_palette_nohex[cat_counter];
-				
-					alpha_cat_arr[cat_counter] = [this_photo.gsx$media.$t, color_palette_nohex[cat_counter]];
-				
-					cat_counter++;
-				
-				}  				
-			  		
-				var marker_animate = new google.maps.Marker({							
-			    	position: myLatlng,
-			      	map: map_animate,
-			    	title: jQuery.trim(this_photo.gsx$description.$t),
-			     	visible: true,
-					clickable: true,
-					icon: 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_photo.gsx$media.$t + "'"]
-					//icon: './docs-assetts/small_dot.png'
-					
-					//shadow: 'http://www.mysite.com/markershadow.png'
-				});
-				
-				marker_animate.genre = this_photo.gsx$genre.$t;
-				marker_animate.media = this_photo.gsx$media.$t;
-				marker_animate.category = 'media';
-				
-				var infowindow_html = '<h3>'+this_photo.gsx$description.$t+'</h3>';
-				infowindow_html += '<img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br><br>';
-				infowindow_html += '<b>Date Taken:</b> '+ this_photo.gsx$datetaken.$t + '<br>';
-				infowindow_html += '<b>Address:</b> '+this_photo.gsx$address.$t + '<br>';
-				infowindow_html += '<b>Latitude:</b> '+this_photo.gsx$latitude.$t + '<br>';
-				infowindow_html += '<b>Longitude:</b> '+this_photo.gsx$longitude.$t + '<br>';
-				infowindow_html += '<b>Media:</b> '+this_photo.gsx$media.$t + '<br>';
-				infowindow_html += '<b>Genre:</b> '+this_photo.gsx$genre.$t + '<br>';
-				infowindow_html += '<b>Art Form:</b> '+this_photo.gsx$artform.$t + '<br>';
-				infowindow_html += '<b>Function:</b> '+this_photo.gsx$function.$t + '<br>';
-				infowindow_html += '<b>Obamicon?:</b> '+this_photo.gsx$isobamacon.$t + '<br>';
-				infowindow_html += '<b>Designer:</b> '+this_photo.gsx$designer.$t + '<br>';
-				infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
-				infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
-				
-					
-				var infowindow_animate = new google.maps.InfoWindow({
-  					content: infowindow_html 
-				});
-				
-					
-				google.maps.event.addListener(marker_animate, 'click', function() {
-					if (prev_infowindow_animate) { prev_infowindow_animate.close();} // close any other infowindows that happen to be open
-					prev_infowindow_animate = infowindow_animate;
-					
-					//var infowindow_animate = new google.maps.InfoWindow({
-  					//	content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
-					//});
-					infowindow_animate.open(map_animate,marker_animate);
-					
-					
-				});
-				
-				// push this marker into a array representing the group of markers
-				gmarkers.push(marker_animate);
-				lat_lng_counter++;
-
-				$("#num_plotted_images").html('Photos With Coordinates: <b>' + lat_lng_counter + '</b>');	
-			}
-			//............................
-								
-		}); // end $.each(json.photos.photo,function(i,myresult){
-					
-	    	 	    		
-	
-		//............................................................................	
-		$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<u>Show/Hide Media:</u><br>');
-		 	
-		alpha_cat_arr.sort(sortFunction);
-		 	
-		for (i = 0; i < alpha_cat_arr.length; i++)
-		{
-			// get each genre type
-			this_cat = alpha_cat_arr[i][0]; 
-		
-			image_loc = 'http://www.googlemapsmarkers.com/v1/' + alpha_cat_arr[i][1];
-			image_html = '<image src="'+ image_loc+'" width=10px class="checkbox_icon" >';
-			// create the html for the checkbox
-			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+'&nbsp; <input type="checkbox" onclick="boxclick(this, ' + "'" + 'media'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
-		
-		} // end for (i = 1; i <= cat_counter; i++)
-				
-	});
-
-
-
-	google.maps.event.addDomListener(window, 'load', initialize);
 	
 	
 	//****************************************************************************
@@ -467,6 +255,13 @@ $(document).ready(function(){
 				{
 					
 	
+					// if this genre is not already in the array of genres, then create the checkbox 
+                    if (jQuery.inArray(this_photo.gsx$mediatype.$t, cat2_arr) === -1)
+                    {
+                            // load the array
+                            cat2_arr[cat2_counter] = this_photo.gsx$mediatype.$t;                                         
+                            cat2_counter++;
+                    }   
 					// it needs to end up looking like the following:
 					//percentage_arr[0] = ['fist_genre', 50];
 					//percentage_arr[1] = ['second_genre', 10];
@@ -495,71 +290,14 @@ $(document).ready(function(){
 				  					
 		}); // end $.each(json.photos.photo,function(i,myresult){
 		
-		console.debug("count:" +count);
-		console.debug("grand_total:" +grand_total);
-		console.debug("0:" +counter_arr[0]);
-		console.debug("1:" +counter_arr[1]);
-		console.debug("2:" +counter_arr[2]);
-		console.debug("3:" +counter_arr[3]);
-		console.debug("4:" +counter_arr[4]);
-		console.debug("5:" +counter_arr[5]);
-			
-		// build the yAxis labels and get data in a format that highcharts likes
-		year_arr_index = 0;
-		month_arr_index = 0;
-		day_arr_index = 0;
-		
-		for (this_year = 2006; this_year <= 2014; this_year++)
-	    {
-	    	// year labels...
-	    	year_labels_arr[year_arr_index] = this_year;
-	    		    	
-	    	// move the counts into the delivery array that highchart wants... index of 0,1,2,3,4,5,6,7,8,etc..
-	    	year_data_arr[year_arr_index] = count_per_year_arr[this_year];
-	    	
-
-	    		    	
-	    	// increment the yearly index
-	    	year_arr_index++;
-
-	    } // end for (this_year = 2006; this_year <= 2014; this_year++)
-	    
+		    
 	    //.................................................
 	    // DEBUG
 	    console.debug('YEARLY: yAxis labels = ' + year_labels_arr);
 		console.debug('YEARLY: highcharts data array = ' + year_data_arr);
 	
 
-	
-		//*****************************************************
-		// Radialize the colors to make them gradient
-	    Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function (color) {
-	        return {
-	            radialGradient: { cx: 0.5, cy: 0.3, r: 0.7 },
-	            stops: [
-	                [0, color],
-	                [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
-	            ]
-	        };
-	    });
-		
-		
-		percentage_arr[0] = ['fist_genre', 50];
-		percentage_arr[1] = ['second_genre', 10];
-		percentage_arr[2] = ['third_genre', 20];
-		percentage_arr[3] = ['fourth_genre', 8];
-		percentage_arr[4] = ['fith_genre', 2];
-		//wrapper_percentage_arr = percentage_arr;
-		
-		//[
-	    //   ['Firefox',   45.0],
-	    //   ['IE',       26.8],
-	    //   ['Chrome',   12.8],
-	    //   ['Safari',    8.5],
-	    //   ['Opera',     6.2],
-	    //   ['Others',   0.7]
-	    //]
-		
+		//****************************************************	
 		Highcharts.setOptions({
         	colors: color_palette_hex 
     	});
@@ -619,8 +357,359 @@ $(document).ready(function(){
 	        
 	    });
 	    
-	     	    
-	}); // end getJson()	
+		//****************************************************
+	    // get the data from the google spreadsheet
+	    $.getJSON(apiurl,function(json){
+	  
+	    	// show status messages...
+	    	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
+	    	$("#loading_progressbar").html(percentage_loaded); 
+		    $("#data_source").html("[<a target=_blank href="+apiurl+">Data Source</a>]");
+		    
+		    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
+		    
+		    // total of all photos across all pages
+		    total_photos = json.feed.openSearch$totalResults.$t;
+		    
+						//...............................
+			// get an array of the years so we can deal with this data better below in the for loop
+			years_arr_counter = 0;
+			for (this_year = 2006; this_year <= 2014; this_year++)
+		    {
+				years_arr[this_year] = years_arr_counter;
+				years_arr_counter++;
+			}	
+			
+			total_years = years_arr_counter;
+			
+			//.......................................................
+			// zero out the day/year/month counters for each genre
+			for (i=0; i < cat2_arr.length; i++)
+			{ 
+		        // create an array for this category, with x (years) number of elements
+		        // the following line properly loads the array...
+			//cat_count_per_year_arr[cat2_arr[i]] = new Array(total_years);
+		        // but we want to assign the appropriate object properties that highcharts wants..
+			
+	 			var arr = new Array();
+	   
+	  			for(var j=0; j < total_years; j++) { 
+	     			arr[j] = 0;
+	  			}
+	
+				var obj = [{ name: cat2_arr[i], data: arr }];
+				cat_count_per_year_arr[cat2_arr[i]] = {name: cat2_arr[i], data: arr}; //new StackedBarChartSeries(cat2_arr[i], total_years);
+	
+			                
+			
+		        years_arr_counter = 0;    
+		        for (this_year = 2006; this_year <= 2014; this_year++)
+		        {
+		                	
+					// only zero it out if it hasnt already been incremented..
+					// this is nessisary for the test case of a genre not having any counts in a particular year
+					// if we leave this as null instead of a zero, highcharts will puke on it
+					//if (cat_count_per_year_arr[cat2_arr[i]] = [this_year] == null)
+					//cat_count_per_year_arr[cat2_arr[i]][years_arr_counter] = 0;
+				    //cat_count_per_year_arr[cat2_arr[i]].data[years_arr_counter] = 0;
+					
+					//cat_count_per_year_arr[cat2_arr[i]].data[years_arr_counter]++;
+					years_arr_counter++;
+		                                
+		           // for(this_month = 1; this_month <= 12; this_month++)
+		            //{       
+						                        
+		                //cat_count_per_month_arr[cat2_arr[i]][this_month+''+this_year] = 0;               
+		
+		            //} // end for(this_month = 1; this_month <= 12; this_month++)
+		       	} // end for (this_year = 2006; this_year <= 2014; this_year++)     
+			}  	
+			// get each photo info..
+			$.each(json.feed.entry,function(i,this_photo){
+				
+	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				// is there a date taken? 
+				// gather the data for the "Genre by year/month" Stacked Bar Chart
+	 			if ((this_photo.gsx$datetaken.$t !== '') && 
+	                (this_photo.gsx$datetaken.$t.substr(0,2) !== '') && 
+	                (this_photo.gsx$datetaken.$t.substr(3,2)) && 
+	                (this_photo.gsx$datetaken.$t.substr(6,4)) &&
+	 			    (this_photo.gsx$media.$t != "")                           
+	               )
+	            {
+					count++; // count each photo as we process it...
+	                $("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
+	                $("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');                                  
+	                $("#status_message").html('<h2>One Moment Please...</h2>');                        
+	                $("#num_obamicons").html('Photos that are Obamicons: <b>' + count + '</b>');    
+	
+	                // get the month and year of the date this photo was taken              
+	                // format: mm-dd-yyyy
+	                month = this_photo.gsx$datetaken.$t.substr(0,2);
+	                day = this_photo.gsx$datetaken.$t.substr(3,2);
+	                year = this_photo.gsx$datetaken.$t.substr(6,4);
+	                
+	
+	                //console.debug('data:' +month+'-'+day+'-'+year);
+	                console.debug('|'+year+'|');
+	                                
+	                // strip leading zeros from the month or day
+	                // EX: datetaken":"2013-11-05 13:28:40
+					if (month.substr(0,1) === '0')
+	                	month = month.substr(1,1);
+	                if (day.substr(0,1) === '0')
+	                        day = day.substr(1,1);          
+	                                
+	                // increment the counter for the year this photo was taken
+	                count_per_year_arr[year]++; 
+	                console.debug(year +' counter'+count_per_year_arr[year]);
+	                                
+	                // increment the counter for the month and year this photo was taken                    
+	                count_per_month_arr[month+''+year]++;                   
+	
+	               	// increment the counter for the month and year this photo was taken                    
+	                count_per_day_arr[day+''+month+''+year]++;              
+	                        
+					// initialize the arra to zero for this genre and year
+					//if( cat_count_per_year_arr[this_photo.gsx$genre.$t][year] == null )
+					//	cat_count_per_year_arr[this_photo.gsx$genre.$t][year] = 0;
+				
+					if (cat_count_per_year_arr[this_photo.gsx$media.$t] != null)			
+					//cat_count_per_year_arr[this_photo.gsx$genre.$t].data[years_arr[year]]++;
+						cat_count_per_year_arr[this_photo.gsx$media.$t].data[years_arr[year]]++;
+				    
+	      			// show status
+	                $("#status_message").html(''); // clear the status message
+	                $("#flickr_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
+	                                                                        
+				} // end if datetaken is blank...
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!				
+				
+				
+				//.................
+				// in for loop:
+				var lat = this_photo.gsx$latitude.$t; //this_photo.latitude; 
+				var lng = this_photo.gsx$longitude.$t; //this_photo.longitude;
+				
+				if ((lat != "") && (lng != "") && (this_photo.gsx$media.$t != ""))
+				{
+					
+					// geo code this address
+					//var geocode_url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + this_photo.gsx$address.$t + "&key=" + api_key;
+					//$.getJSON("https://maps.googleapis.com/maps/api/geocode/json?address=" . ,function(json){
+					//https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=API_KEY
+					
+				  	var myLatlng = new google.maps.LatLng(lat,lng);	
+				  					  					
+				  	//var thumbnail = 'http://farm'+ this_photo.farm + '.staticflickr.com/'+ this_photo.server+ '/'+this_photo.id+'_'+this_photo.secret+'_t.jpg';
+				  	var thumbnail = this_photo.gsx$urltojpg.$t;
+				  	// Format: http://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+				  	// this_photo.secret
+					// this_photo.farm
+					// this_photo.id
+	
+					// if this genre is not already in the array of genres, then create the checkbox 
+					if (jQuery.inArray(this_photo.gsx$media.$t, cat_arr) === -1)
+					{
+							
+						// load the array so we know we already created this checkbox the next loop iteration
+						cat_arr[cat_counter] = this_photo.gsx$media.$t;
+						color_arr["'" + this_photo.gsx$media.$t + "'"] = color_palette_nohex[cat_counter];
+					
+						alpha_cat_arr[cat_counter] = [this_photo.gsx$media.$t, color_palette_nohex[cat_counter]];
+					
+						cat_counter++;
+					
+					}  				
+				  		
+					var marker_animate = new google.maps.Marker({							
+				    	position: myLatlng,
+				      	map: map_animate,
+				    	title: jQuery.trim(this_photo.gsx$description.$t),
+				     	visible: true,
+						clickable: true,
+						icon: 'http://www.googlemapsmarkers.com/v1/' + color_arr["'" + this_photo.gsx$media.$t + "'"]
+						//icon: './docs-assetts/small_dot.png'
+						
+						//shadow: 'http://www.mysite.com/markershadow.png'
+					});
+					
+					marker_animate.genre = this_photo.gsx$genre.$t;
+					marker_animate.media = this_photo.gsx$media.$t;
+					marker_animate.category = 'media';
+					
+					var infowindow_html = '<h3>'+this_photo.gsx$description.$t+'</h3>';
+					infowindow_html += '<img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br><br>';
+					infowindow_html += '<b>Date Taken:</b> '+ this_photo.gsx$datetaken.$t + '<br>';
+					infowindow_html += '<b>Address:</b> '+this_photo.gsx$address.$t + '<br>';
+					infowindow_html += '<b>Latitude:</b> '+this_photo.gsx$latitude.$t + '<br>';
+					infowindow_html += '<b>Longitude:</b> '+this_photo.gsx$longitude.$t + '<br>';
+					infowindow_html += '<b>Media:</b> '+this_photo.gsx$media.$t + '<br>';
+					infowindow_html += '<b>Genre:</b> '+this_photo.gsx$genre.$t + '<br>';
+					infowindow_html += '<b>Art Form:</b> '+this_photo.gsx$artform.$t + '<br>';
+					infowindow_html += '<b>Function:</b> '+this_photo.gsx$function.$t + '<br>';
+					infowindow_html += '<b>Obamicon?:</b> '+this_photo.gsx$isobamacon.$t + '<br>';
+					infowindow_html += '<b>Designer:</b> '+this_photo.gsx$designer.$t + '<br>';
+					infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
+					infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
+					
+						
+					var infowindow_animate = new google.maps.InfoWindow({
+	  					content: infowindow_html 
+					});
+					
+						
+					google.maps.event.addListener(marker_animate, 'click', function() {
+						if (prev_infowindow_animate) { prev_infowindow_animate.close();} // close any other infowindows that happen to be open
+						prev_infowindow_animate = infowindow_animate;
+						
+						//var infowindow_animate = new google.maps.InfoWindow({
+	  					//	content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
+						//});
+						infowindow_animate.open(map_animate,marker_animate);
+						
+						
+					});
+					
+					// push this marker into a array representing the group of markers
+					gmarkers.push(marker_animate);
+					lat_lng_counter++;
+	
+					$("#num_plotted_images").html('Photos With Coordinates: <b>' + lat_lng_counter + '</b>');	
+				}
+				//............................
+									
+			}); // end $.each(json.photos.photo,function(i,myresult){
+						
+		    	 	    		
+		
+			//............................................................................	
+			$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<u>Show/Hide Media:</u><br>');
+			 	
+			alpha_cat_arr.sort(sortFunction);
+			 	
+			for (i = 0; i < alpha_cat_arr.length; i++)
+			{
+				// get each genre type
+				this_cat = alpha_cat_arr[i][0]; 
+			
+				image_loc = 'http://www.googlemapsmarkers.com/v1/' + alpha_cat_arr[i][1];
+				image_html = '<image src="'+ image_loc+'" width=10px class="checkbox_icon" >';
+				// create the html for the checkbox
+				$('#genre-checkboxes').append('&nbsp;&nbsp;&nbsp;<label>'+ image_html+' &nbsp;<input type="checkbox" onclick="boxclick(this, ' + "'" + 'media'+ "'" +','+ "'" + this_cat + "'" + ')"  checked=checked  id="' + this_cat + '"  /> '+this_cat+' </label><br>');
+			
+			} // end for (i = 1; i <= cat_counter; i++)
+		
+			//.........................................................................
+   			// build the yAxis labels and get data in a format that highcharts likes
+            year_arr_index = 0;
+            month_arr_index = 0;
+            day_arr_index = 0;
+            
+            for (this_year = 2006; this_year <= 2014; this_year++)
+        	{
+            	// year labels...
+            	year_labels_arr[year_arr_index] = this_year;
+                            
+            	// move the counts into the delivery array that highchart wants... index of 0,1,2,3,4,5,6,7,8,etc..
+            	year_data_arr[year_arr_index] = count_per_year_arr[this_year];
+            
+            	for(this_month = 1; this_month <= 12; this_month++)
+            	{       
+                    	// monthly labels...
+                    	month_labels_arr[month_arr_index] = this_month+'-'+this_year;
+                            
+                    	// move the counts into the delivery array that highchart wants... index of 1,2,3,4,5,6,7,8,etc..
+                    	month_data_arr[month_arr_index] = count_per_month_arr[this_month+''+this_year];
+                                                    
+                    	// increment the monthly index
+						month_arr_index++;
+
+            	} // end for(this_month = 1; this_month <= 12; this_month++)
+                            
+            	// increment the yearly index
+            	year_arr_index++;
+
+        	} // end for (this_year = 2006; this_year <= 2014; this_year++)
+            
+	
+			var blah = cat_count_per_year_arr;
+	 		var stacked_cat_count_per_year_arr = new Array();
+	 		
+	 		for (t = 0; t < cat2_arr.length; t++)
+	 		{
+	 			stacked_cat_count_per_year_arr[t] = cat_count_per_year_arr[cat2_arr[t]];
+	 			
+	 		}
+	 		
+	 		
+			var temp_data =       
+			[{
+	                    name: 'Charity Art',
+	                    data: [5, 3, 4, 7, 2,3,4,5,6]
+	                }, {
+	                    name: 'Obamicon',
+	                    data: [2, 2, 3, 2, 1,5,6,7,8]
+	                }, {
+	                    name: 'Political Cartoons',
+	                    data: [3, 4, 4, 2, 5,6,7,8,9]
+	                }];
+	
+			var series_data = stacked_cat_count_per_year_arr; //temp_data;
+	
+	   		Highcharts.setOptions({
+	        	colors: color_palette_hex 
+	    	});
+	    	
+			//********************************************
+			 $('#stacked_bar_chart_yearly').highcharts({
+		        chart: {
+		            type: 'bar'
+		        },
+		        title: {
+		            text: 'Media Frequency By Year'
+		        },
+		        xAxis: {
+		            categories: year_labels_arr //['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
+		        },
+		        yAxis: {
+		            min: 0,
+		            title: {
+		                text: 'Total Photos'
+		            }
+		        },
+		        legend: {
+		            reversed: true
+		        },
+		        plotOptions: {
+		            series: {
+		                stacking: 'normal'
+		            }
+		        },
+		        series: series_data 
+		  /*      
+			[{
+		            name: 'Charity Art',
+		            data: [5, 3, 4, 7, 2,3,4,5,6]
+		        }, {
+		            name: 'Obamicon',
+		            data: [2, 2, 3, 2, 1,5,6,7,8]
+		        }, {
+		            name: 'Political Cartoons',
+		            data: [3, 4, 4, 2, 5,6,7,8,9]
+		        }]
+		*/	
+		    });
+		
+		}); // end getJson()			
+	}); // end getJson()
+
+
+
+	google.maps.event.addDomListener(window, 'load', initialize);
+	
+	
+	
 }); // end $(document).ready(function(){
 
 
@@ -773,6 +862,9 @@ function compareSecondColumn(a, b) {
   			<div class="hide_scroll1">	
 				<div id="media_pie_chart" style="width: 900px; height: 500px"></div>
   			</div>
+  			
+  			<hr>
+  			<div id="stacked_bar_chart_yearly"></div>
   			
   			<hr />
  	
