@@ -37,6 +37,9 @@ day_labels_arr = new Array();
 day_data_arr = new Array();
 day_arr_index = 0;
 
+var currentYear = (new Date).getFullYear();
+$("#currentYear").text(currentYear);
+
 count = 0;
 percentage_loaded = 0;
 google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
@@ -46,6 +49,17 @@ google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
 apiurl = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/od6/public/values?alt=json";
 apiurl_html = "https://docs.google.com/spreadsheets/d/"+google_spreadsheet_id+"/pubhtml";
 //apiurl = "http://cors.io/spreadsheets.google.com/feeds/list/1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U/od6/public/values?alt=json";
+
+
+// TEMPORARY: UNTIL WE COMBINE THE TWO SPREADSHEETS
+obamicon_google_spreadsheet_id = '1uZOgUznKuyVWFR_vcvSCLnBYSJ4jxpMDGROQC9nNjuM'; 
+obamicon_sheet_id = 'oisw0ui'; // function pivot table
+obamicon_apiurl_specific_sheet = "https://spreadsheets.google.com/feeds/list/"+obamicon_google_spreadsheet_id+"/"+obamicon_sheet_id+"/public/values?alt=json";
+
+var grand_total = 0;
+var percentage_arr = new Array();
+var counter_arr = new Array();
+
 
 //Key:dd4eb2f7ebff37400f01aae57493f41e
 //Secret:7a6541283f6e96bf
@@ -342,6 +356,128 @@ $(document).ready(function(){
 
 	 }); // end $.getJSON(apiurl,function(json){
 	
+		//****************************************************************************
+	// GATHER THE DATA FOR THE PIE CHART..
+	//***************************************
+	$.getJSON(obamicon_apiurl_specific_sheet,function(json){
+    
+	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
+	   
+	    // total of all photos across all pages
+	    total_photos = json.feed.openSearch$totalResults.$t;
+	         
+	    // initialize the counter     
+	    count = 0;
+	    		
+		// get each photo info..
+		$.each(json.feed.entry,function(i,this_photo){
+			
+			//"gsx$functiontype" : { "$t" : "Acrylic" },
+            //"gsx$numitems" : { "$t" : "1" },
+			
+			if ((this_photo.gsx$functiontype.$t !== '') )
+			{
+				// look for the grand total of the counts
+				if (this_photo.gsx$functiontype.$t == 'Grand Total')
+				{
+					grand_total = this_photo.gsx$numitems.$t;
+				}
+				else
+				{
+					// it needs to end up looking like the following:
+					//percentage_arr[0] = ['fist_genre', 50];
+					//percentage_arr[1] = ['second_genre', 10];
+					//percentage_arr[2] = ['third_genre', 20];
+					//percentage_arr[3] = ['fourth_genre', 8];
+					//percentage_arr[4] = ['fith_genre', 2];
+					
+					counter_arr[count] = [this_photo.gsx$functiontype.$t, parseFloat(this_photo.gsx$numitems.$t)];
+					
+					console.debug(this_photo.gsx$functiontype.$t+'='+ this_photo.gsx$numitems.$t);									
+					count++; // count each photo as we process it...
+				}	
+			} // end if datetaken is blank...
+				  					
+		}); // end $.each(json.photos.photo,function(i,myresult){
+		
+		console.debug("count:" +count);
+		console.debug("grand_total:" +grand_total);
+		console.debug("0:" +counter_arr[0]);
+		console.debug("1:" +counter_arr[1]);
+		console.debug("2:" +counter_arr[2]);
+		console.debug("3:" +counter_arr[3]);
+		console.debug("4:" +counter_arr[4]);
+		console.debug("5:" +counter_arr[5]);
+			
+
+	    //.................................................
+	    // DEBUG
+	    console.debug('YEARLY: yAxis labels = ' + year_labels_arr);
+		console.debug('YEARLY: highcharts data array = ' + year_data_arr);
+	
+
+	
+		//****************************************************
+		//Highcharts.setOptions({
+        //	colors: color_palette_hex 
+    	//});
+		
+		// Build the chart
+	    $('#function_pie_chart').highcharts({
+	       chart: {
+	            plotBackgroundColor: null,
+	            plotBorderWidth: null,
+	            plotShadow: true
+	        },
+	        title: {
+	            text: '<b>Percentage of Obamicons by Function</b>'
+	        },
+	        tooltip: {
+	            pointFormat: '{series.name}: <b>{point.percentage:.1f}% ({point.y})</b>'
+	        },
+	        plotOptions: {
+	            pie: {
+	                allowPointSelect: true,
+	                cursor: 'pointer',
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
+			            //style: {
+		                //	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                //},
+	                    connectorColor: 'silver'
+	                }
+	            }
+	        },
+	        series: [{
+	            type: 'pie',
+	            name: 'Percentage of Function',
+	            data: counter_arr,
+	            showInLegend: true
+	        }],
+	        legend: {
+            	align: 'right',
+            	   layout: 'vertical',
+            	verticalAlign: 'top',
+            	x: 0,
+            	y: 100,
+            	navigation: {
+                	activeColor: '#3E576F',
+                	animation: true,
+                	arrowSize: 12,
+                	inactiveColor: '#CCC',
+                	style: {
+                    	fontWeight: 'bold',
+                    	color: '#333',
+                    	fontSize: '12px'
+                	}
+            	}
+        	},
+	    });
+	     	    
+	}); // end getJson()
+	
+	
 	$(window).load(function() {
 					
 			
@@ -419,6 +555,10 @@ $(document).ready(function(){
      				
    		
       		<hr>
+      		
+      		<div id="function_pie_chart" style="width: 900px; height: 500px"></div>
+  			
+  			
   	<p>
 		<a class="btn btn-success btn-lg" role="button" href="collective_networking.html" >Continue &raquo; Collective Networking</a>
 		</p>
