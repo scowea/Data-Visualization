@@ -88,7 +88,8 @@ $(document).ready(function(){
 
 	count = 0;
 	percentage_loaded = 0;
-	google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
+	google_spreadsheet_id = '1ZZdgJTNrUVV3C9421puSAoUD9Q3x-XGeOQoeKdiO1xY';//'1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
+	// https://docs.google.com/spreadsheets/d/1ZZdgJTNrUVV3C9421puSAoUD9Q3x-XGeOQoeKdiO1xY/edit?usp=sharing
 	
 	//sheet_id = 'od6'; // main sheet is always od6
 	//sheet_id = 'oete2cj'; // media pivot table
@@ -455,8 +456,6 @@ $(document).ready(function(){
 					infowindow_html += '<b>Media:</b> '+this_photo.gsx$media.$t + '<br>';
 					infowindow_html += '<b>Genre:</b> '+this_photo.gsx$genre.$t + '<br>';
 					infowindow_html += '<b>Art Form:</b> '+this_photo.gsx$artform.$t + '<br>';
-					infowindow_html += '<b>Function:</b> '+this_photo.gsx$function.$t + '<br>';
-					infowindow_html += '<b>Obamicon?:</b> '+this_photo.gsx$isobamacon.$t + '<br>';
 					infowindow_html += '<b>Designer:</b> '+this_photo.gsx$designer.$t + '<br>';
 					infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
 					infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
@@ -787,8 +786,8 @@ Below are data visualizations for media and function.
 			</div>
      		<div id="flickr_count"></div>
      		<div id="num_plotted_images"></div>
-  			<div id="map-and-checkboxes-container">
-  				<div id="genre-map" ></div>  			   
+  			<div id="map-and-checkboxes-container" style="width: 100%">
+  				<div id="genre-map"  style="width: 100%" ></div>  			   
   			</div>   	
 			<br>
   			<hr />
