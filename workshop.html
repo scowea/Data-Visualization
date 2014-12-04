@@ -44,6 +44,7 @@ var color_arr = [];
 var lat_lng_counter = 0;
 var genre_cat_count_per_year_arr = new Array();
 var media_cat_count_per_year_arr = new Array();
+var function_cat_count_per_year_arr = new Array();
 
 var years_arr = new Array();
 var years_arr_counter = 0;
@@ -65,6 +66,7 @@ $(document).ready(function(){
 	
 	genre_year_labels_arr = new Array();
 	media_year_labels_arr = new Array();
+	function_year_labels_arr = new Array();
 	
 	year_arr_index = 0;
 	   
@@ -75,12 +77,14 @@ $(document).ready(function(){
 	
 	media_cat2_arr = new Array();
 	genre_cat2_arr = new Array();
+	function_cat2_arr = new Array();
 	
 	alpha_cat_arr = new Array();
 	cat_counter = 0;
 	
 	media_cat2_counter = 0;
 	genre_cat2_counter = 0;
+	function_cat2_counter = 0;
 	
 	heat_map_data_arr = new Array();   
 	   
@@ -109,11 +113,13 @@ $(document).ready(function(){
 	sheet_id = 'onodyhn'; // genre pivot table
 	genre_sheet_id = 'onodyhn'; // genre pivot table
 	media_sheet_id = 'oete2cj'; // media pivot table
-	//sheet_id = 'oisw0ui'; // function pivot table
+	function_sheet_id = 'oijls8d'; // function pivot table
 	
 	apiurl_specific_sheet = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/"+sheet_id+"/public/values?alt=json";
 	apiurl_genre_sheet = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/"+genre_sheet_id+"/public/values?alt=json";
 	apiurl_media_sheet = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/"+media_sheet_id+"/public/values?alt=json";
+	apiurl_function_sheet = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/"+function_sheet_id+"/public/values?alt=json";
+
 	
 	apiurl = "https://spreadsheets.google.com/feeds/list/"+google_spreadsheet_id+"/od6/public/values?alt=json";
 	apiurl_html = "https://docs.google.com/spreadsheets/d/"+google_spreadsheet_id+"/pubhtml";
@@ -125,10 +131,11 @@ $(document).ready(function(){
 
 	var media_grand_total = 0;
 	var genre_grand_total = 0;
-	
+	var function_grand_total = 0;
 	
 	var media_counter_arr = new Array();
 	var genre_counter_arr = new Array();
+	var function_counter_arr = new Array();
 	
 	//apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&jsoncallback=?&api_key=dd4eb2f7ebff37400f01aae57493f41e&tags=obama,hope&tag_mode=all&extras=date_taken,geo&has_geo=1";
 	//Key:dd4eb2f7ebff37400f01aae57493f41e
@@ -951,7 +958,346 @@ $(document).ready(function(){
 				
 	}); // end $.getJSON(apiurl,function(json){ 
 
+//.......................................................................................................
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////// FUNCTION!!!!!!! /////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//.......................................................................................................
+ 
+ 	//****************************************************************************
+	// GATHER THE DATA FOR THE PIE CHART..
+	//***************************************
+	$.getJSON(apiurl_function_sheet,function(json){
+    
+	    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
+	   
+	    // total of all photos across all pages
+	    total_photos = json.feed.openSearch$totalResults.$t;
+	         
+	    // initialize the counter     
+	    count = 0;
+	    		
+		// get each photo info..
+		$.each(json.feed.entry,function(i,this_photo){
+			
+			//"gsx$genretype" : { "$t" : "Acrylic" },
+            //"gsx$numitems" : { "$t" : "1" },
+			
+			if ((this_photo.gsx$functiontype.$t !== '') && (this_photo.gsx$functiontype.$t !== '0'))
+			{
+				// look for the grand total of the counts
+				if (this_photo.gsx$functiontype.$t == 'Grand Total')
+				{
+					function_grand_total = this_photo.gsx$numitems.$t;
+				}
+				else
+				{
+					
+	                // if this genre is not already in the array of genres, then create the checkbox 
+                    if (jQuery.inArray(this_photo.gsx$functiontype.$t, function_cat2_arr) === -1)
+                    {
+                            // load the array
+                            function_cat2_arr[function_cat2_counter] = this_photo.gsx$functiontype.$t;                                         
+                            function_cat2_counter++;
+                    }   
 
+	
+					// it needs to end up looking like the following:
+					//percentage_arr[0] = ['fist_genre', 50];
+					//percentage_arr[1] = ['second_genre', 10];
+					//percentage_arr[2] = ['third_genre', 20];
+					//percentage_arr[3] = ['fourth_genre', 8];
+					//percentage_arr[4] = ['fith_genre', 2];
+					
+					function_counter_arr[count] = [this_photo.gsx$functiontype.$t, parseFloat(this_photo.gsx$numitems.$t)];
+					
+					console.debug(this_photo.gsx$functiontype.$t+'='+ this_photo.gsx$numitems.$t);									
+					count++; // count each photo as we process it...
+	 		
+				}	
+			} // end if date is blank...
+				  					
+		}); // end $.each(json.photos.photo,function(i,myresult){
+		
+		console.debug("count:" +count);
+		console.debug("function grand_total:" +function_grand_total);
+	
+			
+	    //.................................................
+	    // DEBUG
+	    console.debug('YEARLY: yAxis labels = ' + function_year_labels_arr);
+	
+		//*****************************************************
+		Highcharts.setOptions({
+        	colors: color_palette3_hex 
+    	});
+		
+		// Build the chart
+	    $('#function_pie_chart').highcharts({
+	       chart: {
+	            plotBackgroundColor: null,
+	            plotBorderWidth: null,
+	            plotShadow: true
+	        },
+	        title: {
+	            text: '<b>Percentage of Function</b>'
+	        },
+	        tooltip: {
+	            pointFormat: '{series.name}: <b>{point.percentage:.1f}% ({point.y})</b>'
+	        },
+	        plotOptions: {
+	            pie: {
+	                allowPointSelect: true,
+	                cursor: 'pointer',
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '<b>{point.name}</b>: {point.percentage:.1f} % ({point.y})',
+			            //style: {
+		               // 	color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+		                //},
+	                    connectorColor: 'silver'
+	                }
+	            }
+	        },
+	        series: [{
+	            type: 'pie',
+	            name: 'Percentage of Function',
+	            data: function_counter_arr,
+	            showInLegend: true
+	        }],
+	        legend: {
+            	align: 'right',
+            	   layout: 'vertical',
+            	verticalAlign: 'top',
+            	x: 0,
+            	y: 100,
+            	navigation: {
+                	activeColor: '#3E576F',
+                	animation: true,
+                	arrowSize: 12,
+                	inactiveColor: '#CCC',
+                	style: {
+                    	fontWeight: 'bold',
+                    	color: '#333',
+                    	fontSize: '12px'
+                	}
+            	}
+        	},
+	    });
+	     	    
+		//***************************************************************************************  	
+	    // get the data from the google spreadsheet
+	    $.getJSON(apiurl,function(json){
+	    	
+	        
+		    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
+		    
+		    // total of all photos across all pages
+		    total_photos = json.feed.openSearch$totalResults.$t;
+	
+			//...............................
+			// get an array of the years so we can deal with this data better below in the for loop
+			years_arr_counter = 0;
+			for (this_year = 2006; this_year <= 2014; this_year++)
+		    {
+				years_arr[this_year] = years_arr_counter;
+				years_arr_counter++;
+			}	
+			
+			total_years = years_arr_counter;
+			
+			//.......................................................
+			// zero out the day/year/month counters for each genre
+			for (i=0; i < function_cat2_arr.length; i++)
+			{ 
+		        // create an array for this category, with x (years) number of elements
+		        // the following line properly loads the array...
+			//cat_count_per_year_arr[cat2_arr[i]] = new Array(total_years);
+		        // but we want to assign the appropriate object properties that highcharts wants..
+			
+	 			var arr = new Array();
+	   
+	  			for(var j=0; j < total_years; j++) { 
+	     			arr[j] = 0;
+	  			}
+	
+				var obj = [{ name: function_cat2_arr[i], data: arr }];
+				function_cat_count_per_year_arr[function_cat2_arr[i]] = {name: function_cat2_arr[i], data: arr}; //new StackedBarChartSeries(cat2_arr[i], total_years);
+	
+			                
+			
+		        years_arr_counter = 0;    
+		        for (this_year = 2006; this_year <= 2014; this_year++)
+		        {
+		                	
+					// only zero it out if it hasnt already been incremented..
+					// this is nessisary for the test case of a genre not having any counts in a particular year
+					// if we leave this as null instead of a zero, highcharts will puke on it
+					//if (cat_count_per_year_arr[cat2_arr[i]] = [this_year] == null)
+					//cat_count_per_year_arr[cat2_arr[i]][years_arr_counter] = 0;
+				    //cat_count_per_year_arr[cat2_arr[i]].data[years_arr_counter] = 0;
+					
+					//cat_count_per_year_arr[cat2_arr[i]].data[years_arr_counter]++;
+					years_arr_counter++;
+		                                
+		           // for(this_month = 1; this_month <= 12; this_month++)
+		            //{       
+						                        
+		                //cat_count_per_month_arr[cat2_arr[i]][this_month+''+this_year] = 0;               
+		
+		            //} // end for(this_month = 1; this_month <= 12; this_month++)
+		       	} // end for (this_year = 2006; this_year <= 2014; this_year++)     
+			}  	
+	
+		    
+			// get each photo info..
+			$.each(json.feed.entry,function(i,this_photo){
+				
+	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				// is there a date taken? 
+				// gather the data for the "Genre by year/month" Stacked Bar Chart
+	 			if ((this_photo.gsx$date.$t !== '') && 
+	                (this_photo.gsx$date.$t.substr(0,2) !== '') && 
+	                (this_photo.gsx$date.$t.substr(3,2)) && 
+	                (this_photo.gsx$date.$t.substr(6,4)) &&
+	 			    (this_photo.gsx$function.$t != "")                           
+	               )
+	            {
+            	
+					count++; // count each photo as we process it...
+	                
+	                // get the month and year of the date this photo was taken              
+	                // format: mm-dd-yyyy
+	                month = this_photo.gsx$date.$t.substr(0,2);
+	                day = this_photo.gsx$date.$t.substr(3,2);
+	                year = this_photo.gsx$date.$t.substr(6,4);
+	                
+	
+	                //console.debug('data:' +month+'-'+day+'-'+year);
+	                console.debug('|'+year+'|');
+	                                
+	                // strip leading zeros from the month or day
+	                // EX: date":"2013-11-05 13:28:40
+					if (month.substr(0,1) === '0')
+	                	month = month.substr(1,1);
+	                if (day.substr(0,1) === '0')
+	                    day = day.substr(1,1);          
+	                                
+	                // increment the counter for the year this photo was taken
+	                count_per_year_arr[year]++; 
+	                console.debug(year +' counter'+count_per_year_arr[year]);
+	                                
+	                // increment the counter for the month and year this photo was taken                    
+	                count_per_month_arr[month+''+year]++;                   
+	
+	               	// increment the counter for the month and year this photo was taken                    
+	                count_per_day_arr[day+''+month+''+year]++;              
+	                        
+					// initialize the arra to zero for this genre and year
+					//if( cat_count_per_year_arr[this_photo.gsx$genre.$t][year] == null )
+					//	cat_count_per_year_arr[this_photo.gsx$genre.$t][year] = 0;
+				
+				 	if (function_cat_count_per_year_arr[this_photo.gsx$function.$t] != null)
+					//cat_count_per_year_arr[this_photo.gsx$genre.$t].data[years_arr[year]]++;
+						function_cat_count_per_year_arr[this_photo.gsx$function.$t].data[years_arr[year]]++;
+				    
+	      			   
+	                
+	                                                                        
+				} // end if date is blank...
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				
+				
+	
+				//............................
+									
+			}); // end $.each(json.photos.photo,function(i,myresult){
+						
+		    	 	    		
+			 	
+			
+	
+	
+	
+			//.........................................................................
+	       		// build the yAxis labels and get data in a format that highcharts likes
+            year_arr_index = 0;
+            month_arr_index = 0;
+            day_arr_index = 0;
+            
+            for (this_year = 2006; this_year <= 2014; this_year++)
+        	{
+            	// year labels...
+            	function_year_labels_arr[year_arr_index] = this_year;
+                                        
+            	// increment the yearly index
+            	year_arr_index++;
+
+        	} // end for (this_year = 2006; this_year <= 2014; this_year++)
+	            
+	
+	 		var stacked_cat_count_per_year_arr = new Array();
+	 		
+	 		for (t = 0; t < function_cat2_arr.length; t++)
+	 		{
+	 			stacked_cat_count_per_year_arr[t] = function_cat_count_per_year_arr[function_cat2_arr[t]];
+	 			
+	 		}
+	 		
+	 		
+	
+	
+			var function_series_data = stacked_cat_count_per_year_arr; //temp_data;
+	
+	   		Highcharts.setOptions({
+	        	colors: color_palette3_hex 
+	    	});
+	    	
+			//********************************************
+			 $('#function_stacked_bar_chart_yearly').highcharts({
+		        chart: {
+		            type: 'bar'
+		        },
+		        title: {
+		            text: 'Function Frequency By Year'
+		        },
+		        xAxis: {
+		            categories: function_year_labels_arr //['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
+		        },
+		        yAxis: {
+		            min: 0,
+		            title: {
+		                text: 'Total Photos'
+		            }
+		        },
+		        legend: {
+		            reversed: true
+		        },
+		        plotOptions: {
+		            series: {
+		                stacking: 'normal'
+		            }
+		        },
+		        series: function_series_data 
+		  /*      
+			[{
+		            name: 'Charity Art',
+		            data: [5, 3, 4, 7, 2,3,4,5,6]
+		        }, {
+		            name: 'Obamicon',
+		            data: [2, 2, 3, 2, 1,5,6,7,8]
+		        }, {
+		            name: 'Political Cartoons',
+		            data: [3, 4, 4, 2, 5,6,7,8,9]
+		        }]
+		*/	
+		    });
+	
+	
+		}); // end getJson()	
+		
+				
+	}); // end $.getJSON(apiurl,function(json){ 
 
 
 	google.maps.event.addDomListener(window, 'load', initialize);
@@ -1130,7 +1476,11 @@ Below are data visualizations for media and function.
 	  		<div id="media_pie_chart" style="width: 900px; height: 500px"></div>
 	  		<hr>
 	  		<div id="media_stacked_bar_chart_yearly"></div>
-	  			
+	  		<hr>
+	  		<div id="function_pie_chart" style="width: 900px; height: 500px"></div>
+	  		<hr>
+	  		<div id="function_stacked_bar_chart_yearly"></div>
+	  			  			
 			<hr />    			
   								
       		<footer>
