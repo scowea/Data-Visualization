@@ -35,6 +35,9 @@ function initialize() {
 	
 var gmarkers = [];	
 var color_palette_hex = ['#eeeeee','#25c3ff','#00ff38','#ff9429','#000000','#f0f20e','#ff0000','#a95000','#582268','#595959','#9f8fe7','#195e36','#51a176','#b03030','#304376','#9ac1d0','#ff00e7','#b00007','#f1bd00','#1869c5','#16a111','#9426b2','#4020d0'];
+var color_palette2_hex = ['#a95000','#582268','#595959','#9f8fe7','#195e36','#51a176','#b03030','#304376','#9ac1d0','#ff00e7','#b00007','#f1bd00','#1869c5','#16a111','#9426b2','#4020d0','#eeeeee','#25c3ff','#00ff38','#ff9429','#000000','#f0f20e','#ff0000'];
+var color_palette3_hex = ['#9ac1d0','#ff00e7','#b00007','#f1bd00','#1869c5','#16a111','#9426b2','#4020d0','#eeeeee','#25c3ff','#00ff38','#ff9429','#000000','#f0f20e','#ff0000','#a95000','#582268','#595959','#9f8fe7','#195e36','#51a176','#b03030','#304376'];
+
 var color_palette_nohex = [];
 var color_arr = [];
 
@@ -195,7 +198,7 @@ $(document).ready(function(){
 					count++; // count each photo as we process it...
 	 		
 				}	
-			} // end if datetaken is blank...
+			} // end if date is blank...
 				  					
 		}); // end $.each(json.photos.photo,function(i,myresult){
 		
@@ -209,7 +212,7 @@ $(document).ready(function(){
 	
 		//*****************************************************
 		Highcharts.setOptions({
-        	colors: color_palette_hex 
+        	colors: color_palette2_hex 
     	});
 		
 		// Build the chart
@@ -340,10 +343,10 @@ $(document).ready(function(){
 	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				// is there a date taken? 
 				// gather the data for the "Genre by year/month" Stacked Bar Chart
-	 			if ((this_photo.gsx$datetaken.$t !== '') && 
-	                (this_photo.gsx$datetaken.$t.substr(0,2) !== '') && 
-	                (this_photo.gsx$datetaken.$t.substr(3,2)) && 
-	                (this_photo.gsx$datetaken.$t.substr(6,4)) &&
+	 			if ((this_photo.gsx$date.$t !== '') && 
+	                (this_photo.gsx$date.$t.substr(0,2) !== '') && 
+	                (this_photo.gsx$date.$t.substr(3,2)) && 
+	                (this_photo.gsx$date.$t.substr(6,4)) &&
 	 			    (this_photo.gsx$genre.$t != "")                           
 	               )
 	            {
@@ -354,23 +357,23 @@ $(document).ready(function(){
             		
             	
 					count++; // count each photo as we process it...
-	                $("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
+	                $("#flickr_data").append(count + ': '+ this_photo.gsx$date.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
 	                $("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');                                  
 	                $("#status_message").html('<h2>One Moment Please...</h2>');                        
 	                $("#num_obamicons").html('Photos that are Obamicons: <b>' + count + '</b>');    
 	
 	                // get the month and year of the date this photo was taken              
 	                // format: mm-dd-yyyy
-	                month = this_photo.gsx$datetaken.$t.substr(0,2);
-	                day = this_photo.gsx$datetaken.$t.substr(3,2);
-	                year = this_photo.gsx$datetaken.$t.substr(6,4);
+	                month = this_photo.gsx$date.$t.substr(0,2);
+	                day = this_photo.gsx$date.$t.substr(3,2);
+	                year = this_photo.gsx$date.$t.substr(6,4);
 	                
 	
 	                //console.debug('data:' +month+'-'+day+'-'+year);
 	                console.debug('|'+year+'|');
 	                                
 	                // strip leading zeros from the month or day
-	                // EX: datetaken":"2013-11-05 13:28:40
+	                // EX: date":"2013-11-05 13:28:40
 					if (month.substr(0,1) === '0')
 	                	month = month.substr(1,1);
 	                if (day.substr(0,1) === '0')
@@ -400,7 +403,7 @@ $(document).ready(function(){
 	                   
 	                
 	                                                                        
-				} // end if datetaken is blank...
+				} // end if date is blank...
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
 				
@@ -460,14 +463,15 @@ $(document).ready(function(){
 					
 					var infowindow_html = '<h3>'+this_photo.gsx$description.$t+'</h3>';
 					infowindow_html += '<img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br><br>';
-					infowindow_html += '<b>Date Taken:</b> '+ this_photo.gsx$datetaken.$t + '<br>';
+					infowindow_html += '<b>Date:</b> '+ this_photo.gsx$date.$t + '<br>';
 					infowindow_html += '<b>Address:</b> '+this_photo.gsx$address.$t + '<br>';
 					infowindow_html += '<b>Latitude:</b> '+this_photo.gsx$latitude.$t + '<br>';
 					infowindow_html += '<b>Longitude:</b> '+this_photo.gsx$longitude.$t + '<br>';
 					infowindow_html += '<b>Media:</b> '+this_photo.gsx$media.$t + '<br>';
 					infowindow_html += '<b>Genre:</b> '+this_photo.gsx$genre.$t + '<br>';
-					infowindow_html += '<b>Art Form:</b> '+this_photo.gsx$artform.$t + '<br>';
-					infowindow_html += '<b>Designer:</b> '+this_photo.gsx$designer.$t + '<br>';
+					infowindow_html += '<b>Function:</b> '+this_photo.gsx$function.$t + '<br>';
+					infowindow_html += '<b>Form:</b> '+this_photo.gsx$form.$t + '<br>';
+					infowindow_html += '<b>Designer/Author:</b> '+this_photo.gsx$designerauthor.$t + '<br>';
 					infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
 					infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
 					
@@ -551,7 +555,7 @@ $(document).ready(function(){
 			var genre_series_data = stacked_cat_count_per_year_arr; //temp_data;
 	
 	   		Highcharts.setOptions({
-	        	colors: color_palette_hex 
+	        	colors: color_palette2_hex 
 	    	});
 	    	
 			//********************************************
@@ -663,7 +667,7 @@ $(document).ready(function(){
 					count++; // count each photo as we process it...
 	 		
 				}	
-			} // end if datetaken is blank...
+			} // end if date is blank...
 				  					
 		}); // end $.each(json.photos.photo,function(i,myresult){
 		
@@ -804,10 +808,10 @@ $(document).ready(function(){
 	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				// is there a date taken? 
 				// gather the data for the "Genre by year/month" Stacked Bar Chart
-	 			if ((this_photo.gsx$datetaken.$t !== '') && 
-	                (this_photo.gsx$datetaken.$t.substr(0,2) !== '') && 
-	                (this_photo.gsx$datetaken.$t.substr(3,2)) && 
-	                (this_photo.gsx$datetaken.$t.substr(6,4)) &&
+	 			if ((this_photo.gsx$date.$t !== '') && 
+	                (this_photo.gsx$date.$t.substr(0,2) !== '') && 
+	                (this_photo.gsx$date.$t.substr(3,2)) && 
+	                (this_photo.gsx$date.$t.substr(6,4)) &&
 	 			    (this_photo.gsx$media.$t != "")                           
 	               )
 	            {
@@ -816,16 +820,16 @@ $(document).ready(function(){
 	                
 	                // get the month and year of the date this photo was taken              
 	                // format: mm-dd-yyyy
-	                month = this_photo.gsx$datetaken.$t.substr(0,2);
-	                day = this_photo.gsx$datetaken.$t.substr(3,2);
-	                year = this_photo.gsx$datetaken.$t.substr(6,4);
+	                month = this_photo.gsx$date.$t.substr(0,2);
+	                day = this_photo.gsx$date.$t.substr(3,2);
+	                year = this_photo.gsx$date.$t.substr(6,4);
 	                
 	
 	                //console.debug('data:' +month+'-'+day+'-'+year);
 	                console.debug('|'+year+'|');
 	                                
 	                // strip leading zeros from the month or day
-	                // EX: datetaken":"2013-11-05 13:28:40
+	                // EX: date":"2013-11-05 13:28:40
 					if (month.substr(0,1) === '0')
 	                	month = month.substr(1,1);
 	                if (day.substr(0,1) === '0')
@@ -852,7 +856,7 @@ $(document).ready(function(){
 	      			   
 	                
 	                                                                        
-				} // end if datetaken is blank...
+				} // end if date is blank...
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				
 				
