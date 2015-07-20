@@ -190,6 +190,10 @@ $(document).ready(function(){
 	day_data_arr = new Array();
 	day_arr_index = 0;
 	
+	var currentYear = (new Date).getFullYear();
+	$("#currentYear").text(currentYear);
+	
+	
 	count = 0;
 	percentage_loaded = 0;
 	google_spreadsheet_id = '1Nje2Q1ZsVPZprkw7DCCdOQJzL95hQL6SSYjpr12rd1U';
@@ -383,7 +387,7 @@ $(document).ready(function(){
 						//...............................
 			// get an array of the years so we can deal with this data better below in the for loop
 			years_arr_counter = 0;
-			for (this_year = 2006; this_year <= 2014; this_year++)
+			for (this_year = 2006; this_year <= currentYear; this_year++)
 		    {
 				years_arr[this_year] = years_arr_counter;
 				years_arr_counter++;
@@ -412,7 +416,7 @@ $(document).ready(function(){
 			                
 			
 		        years_arr_counter = 0;    
-		        for (this_year = 2006; this_year <= 2014; this_year++)
+		        for (this_year = 2006; this_year <= currentYear; this_year++)
 		        {
 		                	
 					// only zero it out if it hasnt already been incremented..
@@ -431,7 +435,7 @@ $(document).ready(function(){
 		                //cat_count_per_month_arr[cat2_arr[i]][this_month+''+this_year] = 0;               
 		
 		            //} // end for(this_month = 1; this_month <= 12; this_month++)
-		       	} // end for (this_year = 2006; this_year <= 2014; this_year++)     
+		       	} // end for (this_year = 2006; this_year <= currentYear; this_year++)     
 			}  	
 			// get each photo info..
 			$.each(json.feed.entry,function(i,this_photo){
@@ -615,7 +619,7 @@ $(document).ready(function(){
             month_arr_index = 0;
             day_arr_index = 0;
             
-            for (this_year = 2006; this_year <= 2014; this_year++)
+            for (this_year = 2006; this_year <= currentYear; this_year++)
         	{
             	// year labels...
             	year_labels_arr[year_arr_index] = this_year;
@@ -639,7 +643,7 @@ $(document).ready(function(){
             	// increment the yearly index
             	year_arr_index++;
 
-        	} // end for (this_year = 2006; this_year <= 2014; this_year++)
+        	} // end for (this_year = 2006; this_year <= currentYear; this_year++)
             
 	
 			var blah = cat_count_per_year_arr;
