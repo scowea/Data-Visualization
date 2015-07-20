@@ -34,7 +34,125 @@ function initialize() {
 //#####################################################################################
 	
 var gmarkers = [];	
-var color_palette_hex = ['#eeeeee','#25c3ff','#00ff38','#ff9429','#000000','#f0f20e','#ff0000','#a95000','#582268','#595959','#9f8fe7','#195e36','#51a176','#b03030','#304376','#9ac1d0','#ff00e7','#b00007','#f1bd00','#1869c5','#16a111','#9426b2','#4020d0'];
+
+var color_palette_hex = [
+// blue colors
+'#87cefa',// 1. light sky blue
+'#1e90ff',// 2. doger blue
+'#0000ff',// 3. blue
+'#000080',// 4. navy
+
+// orange colors
+'#ff4500',// 5. orange red
+'#ffa500',// 6. orange
+
+// green colors
+'#00ff00',// 7. lime 
+'#90ee90',// 8. light green
+'#228b22',// 9. forest green
+'#006400',// 10. dark green
+
+ // red colors
+'#ffa07a',// 11. light salmon
+'#f08080',// 12. light coral
+'#8b0000',// 13. dark red
+'#ff0000',// 14. red
+
+// yellow colors
+'#ffff00',// 15. yellow
+'#bdb7b6',// 16. dark khaki
+'#ffd700',// 17. gold
+
+// brown colors
+'#f5deb3',// 18. wheat
+'#d2b48c',// 19. tan
+'#cd853f',// 20. peru 
+'#8b4513',// 21. saddlebrown
+
+// pink colors
+'#ffc0cb',// 22. pink
+'#ff69b4',// 23. hotpink
+'#ff1493',// 24. deep pink 
+'#c71585',// 25. med violet red
+
+// cyan colors
+'#00ffff',// 26. cyan
+'#afeeee',// 27. pale turquoise
+'#7fffd4',// 28. aquamarine
+'#48d1cc',// 29. med torquoise
+
+// purple colors
+'#ff00ff',// 30. fuchsia
+'#9370db',// 31. med purple
+'#4b0082',// 32. indigo
+
+// white gray/black colors
+'#d3d3d3',// 33. light grey
+'#a9a9a9',// 34. dark gray
+'#696969',// 35. dim gray
+'#000000',// 36. black  
+
+// ---------------
+// colors repeated
+// ---------------
+
+// blue colors
+'#87cefa',// 1. light sky blue
+'#1e90ff',// 2. doger blue
+'#0000ff',// 3. blue
+'#000080',// 4. navy
+
+// orange colors
+'#ff4500',// 5. orange red
+'#ffa500',// 6. orange
+
+// green colors
+'#00ff00',// 7. lime 
+'#90ee90',// 8. light green
+'#228b22',// 9. forest green
+'#006400',// 10. dark green
+
+ // red colors
+'#ffa07a',// 11. light salmon
+'#f08080',// 12. light coral
+'#8b0000',// 13. dark red
+'#ff0000',// 14. red
+
+// yellow colors
+'#ffff00',// 15. yellow
+'#bdb7b6',// 16. dark khaki
+'#ffd700',// 17. gold
+
+// brown colors
+'#f5deb3',// 18. wheat
+'#d2b48c',// 19. tan
+'#cd853f',// 20. peru 
+'#8b4513',// 21. saddlebrown
+
+// pink colors
+'#ffc0cb',// 22. pink
+'#ff69b4',// 23. hotpink
+'#ff1493',// 24. deep pink 
+'#c71585',// 25. med violet red
+
+// cyan colors
+'#00ffff',// 26. cyan
+'#afeeee',// 27. pale turquoise
+'#7fffd4',// 28. aquamarine
+'#48d1cc',// 29. med torquoise
+
+// purple colors
+'#ff00ff',// 30. fuchsia
+'#9370db',// 31. med purple
+'#4b0082',// 32. indigo
+
+// white gray/black colors
+'#d3d3d3',// 33. light grey
+'#a9a9a9',// 34. dark gray
+'#696969',// 35. dim gray
+'#000000',// 36. black  
+];
+
 var color_palette_nohex = [];
 var color_arr = [];
 
@@ -259,7 +377,7 @@ $(document).ready(function(){
 	    	
 	    	// show status messages...
 	    	$("#flickr_count").html('<p>Loading Photos: '+count+'</p>');
-	    	$("#loading_progressbar").html(percentage_loaded); 
+	    	
 		    $("#data_source").html("[<a target=_blank href="+apiurl+">Data Source</a>]");
 		    
 		    console.debug('opensearch$totalResults = ' + json.feed.openSearch$totalResults.$t);
@@ -335,6 +453,12 @@ $(document).ready(function(){
 	 			    (this_photo.gsx$genre.$t != "")                           
 	               )
 	            {
+	            	
+	            	
+
+	            	
+            		
+            	
 					count++; // count each photo as we process it...
 	                $("#flickr_data").append(count + ': '+ this_photo.gsx$datetaken.$t+';'+this_photo.gsx$address.$t+','+this_photo.gsx$urltojpg.$t+'|');
 	                $("#flickr_count").html('<p>Loading Photos From Google Spreadsheet: <b>'+count+'</b></p>');                                  
@@ -379,6 +503,8 @@ $(document).ready(function(){
 	      			// show status
 	                $("#status_message").html(''); // clear the status message
 	                $("#flickr_count").html('<p>Photos Loaded: <b>'+total_photos+'</b> [<a target=_blank href='+apiurl+'>JSON</a>][<a target=_blank href='+apiurl_html+'>Data Source</a>]</p>');
+	                   
+	                
 	                                                                        
 				} // end if datetaken is blank...
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -604,7 +730,15 @@ $(document).ready(function(){
 		    });
 	
 	
-		}); // end getJson()			
+		}); // end getJson()	
+		
+		var progress_bar = document.getElementById('progress-bar');
+		progress_bar.style.width = '100%';
+							 					
+		// we are done so hide the progress bar
+		var progress_bar_container = document.getElementById('progress');
+		progress_bar_container.style.visibility="hidden";
+				
 	}); // end $.getJSON(apiurl,function(json){   
 
 
@@ -775,6 +909,9 @@ function CreateSeriesArray(num_years)
 <p>
 The first genre map is an Obamicon map. Obamicons are this. Structured in the style of Obama Hope, viewers can click on the different pixels to see all the different Obamicons that have been created. Links to those images are also available.
 </p>
+			<div id="progress" class="progress">
+				<div id="progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div> 
+			</div>
      		<div id="flickr_count"></div>
      		<div id="num_plotted_images"></div>
   			<div id="map-and-checkboxes-container">

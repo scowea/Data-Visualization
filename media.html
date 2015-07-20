@@ -32,103 +32,112 @@ function initialize() {
 //#####################################################################################
 	
 var gmarkers = [];	
-/*
-var color_palette_hex = [
-'#eeeeee',// 1. light grey
-'#aaaaaa', //24   med grey 
 
-'#595959',// 10. dark grey
-
-'#7a643b',// 26. light brown
-'#a95000',// 8. brown
-'#000000',// 5. black
-
-'#25c3ff',// 2. light blue
-'#9ac1d0',// 15. light/med blue
-'#385698',// 25. med blue
-'#1869c5',// 19. royal blue
-'#304376',// 14. dull dark blue
-
-
-
-
-'#c6efa8',// 27. light green
-'#00ff38',// 3. bright green
-'#16a111',// 20. med green
-'#51a176',// 13. light/med green
-'#195e36',// 12. dark green
-
-'#f0f20e',// 6. yellow
-'#f1bd00',// 18. dark yellow
-
-'#ff9429',// 4. orange
-'#ff6600',// 23. orange
-
-'#ff0000',// 7. red
-'#b00007',// 17. dark red
-'#ff00e7',// 16. pink
-
-'#9f8fe7',// 11. light purple
-'#9426b2',// 21. med purple
-'#582268',// 9. purple
-'#4020d0',// 22. dark purple/blue
-
-
-'',// 29.
-'',// 30.
-'',// 31.
-'',// 32.
-'',// 33.
-'',// 34.
-'',// 35.
-''// 36.
-];
-*/
 var color_palette_hex = [
 // blue colors
-'#87cefa',// 26. light sky blue
-'#1e90ff',// 27. doger blue
-'#0000ff',// 28. blue
-'#000080',// 29. navy
+'#87cefa',// 1. light sky blue
+'#1e90ff',// 2. doger blue
+'#0000ff',// 3. blue
+'#000080',// 4. navy
 
 // orange colors
-'#ff4500',// 9. orange red
-'#ffa500',// 10. orange
+'#ff4500',// 5. orange red
+'#ffa500',// 6. orange
 
 // green colors
-'#00ff00',// 18. lime 
-'#90ee90',// 19. light green
-'#228b22',// 20. forest green
-'#006400',// 21. dark green
+'#00ff00',// 7. lime 
+'#90ee90',// 8. light green
+'#228b22',// 9. forest green
+'#006400',// 10. dark green
 
  // red colors
-'#ffa07a',// 5. light salmon
-'#f08080',// 6. light coral
-'#8b0000',// 7. dark red
-'#ff0000',// 8. red
+'#ffa07a',// 11. light salmon
+'#f08080',// 12. light coral
+'#8b0000',// 13. dark red
+'#ff0000',// 14. red
 
 // yellow colors
-'#ffff00',// 11. yellow
-'#bdb7b6',// 12. dark khaki
-'#ffd700',// 13. gold
+'#ffff00',// 15. yellow
+'#bdb7b6',// 16. dark khaki
+'#ffd700',// 17. gold
 
 // brown colors
-'#f5deb3',// 14. wheat
-'#d2b48c',// 15. tan
-'#cd853f',// 16. peru 
-'#8b4513',// 17. saddlebrown
+'#f5deb3',// 18. wheat
+'#d2b48c',// 19. tan
+'#cd853f',// 20. peru 
+'#8b4513',// 21. saddlebrown
 
 // pink colors
-'#ffc0cb',//1. pink
-'#ff69b4',//2. hotpink
-'#ff1493',//3. deep pink 
-'#c71585',//4. med violet red
+'#ffc0cb',// 22. pink
+'#ff69b4',// 23. hotpink
+'#ff1493',// 24. deep pink 
+'#c71585',// 25. med violet red
 
 // cyan colors
-'#00ffff',// 22. cyan
-'#afeeee',// 23. pale turquoise
-'#7fffd4',// 24. aquamarine
-'#48d1cc',// 25. med torquoise
+'#00ffff',// 26. cyan
+'#afeeee',// 27. pale turquoise
+'#7fffd4',// 28. aquamarine
+'#48d1cc',// 29. med torquoise
+
+// purple colors
+'#ff00ff',// 30. fuchsia
+'#9370db',// 31. med purple
+'#4b0082',// 32. indigo
+
+// white gray/black colors
+'#d3d3d3',// 33. light grey
+'#a9a9a9',// 34. dark gray
+'#696969',// 35. dim gray
+'#000000',// 36. black  
+
+// ---------------
+// colors repeated
+// ---------------
+
+// blue colors
+'#87cefa',// 1. light sky blue
+'#1e90ff',// 2. doger blue
+'#0000ff',// 3. blue
+'#000080',// 4. navy
+
+// orange colors
+'#ff4500',// 5. orange red
+'#ffa500',// 6. orange
+
+// green colors
+'#00ff00',// 7. lime 
+'#90ee90',// 8. light green
+'#228b22',// 9. forest green
+'#006400',// 10. dark green
+
+ // red colors
+'#ffa07a',// 11. light salmon
+'#f08080',// 12. light coral
+'#8b0000',// 13. dark red
+'#ff0000',// 14. red
+
+// yellow colors
+'#ffff00',// 15. yellow
+'#bdb7b6',// 16. dark khaki
+'#ffd700',// 17. gold
+
+// brown colors
+'#f5deb3',// 18. wheat
+'#d2b48c',// 19. tan
+'#cd853f',// 20. peru 
+'#8b4513',// 21. saddlebrown
+
+// pink colors
+'#ffc0cb',// 22. pink
+'#ff69b4',// 23. hotpink
+'#ff1493',// 24. deep pink 
+'#c71585',// 25. med violet red
+
+// cyan colors
+'#00ffff',// 26. cyan
+'#afeeee',// 27. pale turquoise
+'#7fffd4',// 28. aquamarine
+'#48d1cc',// 29. med torquoise
 
 // purple colors
 '#ff00ff',// 30. fuchsia
