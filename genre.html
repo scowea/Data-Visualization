@@ -239,7 +239,7 @@ $(document).ready(function(){
 	//..........................................................................        
     
 	var map_animateLatlng = new google.maps.LatLng(35.232471, 9.319066);//(38.89808,-77.036523);
-	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
+	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN, minZoom: 2 };// satillite view
 	map_animate = new google.maps.Map(document.getElementById("genre-map"), map_animateOptions);    
 	  	
 
@@ -563,7 +563,8 @@ $(document).ready(function(){
 					marker_animate.genre = this_photo.gsx$genre.$t;
 					marker_animate.category = 'genre';
 					
-					var infowindow_html = '<h3>'+this_photo.gsx$description.$t+'</h3>';
+					var infowindow_html = '<div class = "MarkerPopUp" style="height: 300px;">';
+					infowindow_html += '<h3>'+this_photo.gsx$description.$t+'</h3>';
 					infowindow_html += '<img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br><br>';
 					infowindow_html += '<b>Date Taken:</b> '+ this_photo.gsx$datetaken.$t + '<br>';
 					infowindow_html += '<b>Address:</b> '+this_photo.gsx$address.$t + '<br>';
@@ -577,7 +578,7 @@ $(document).ready(function(){
 					infowindow_html += '<b>Designer:</b> '+this_photo.gsx$designer.$t + '<br>';
 					infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
 					infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
-					
+					infowindow_html += '</div>';
 						
 					var infowindow_animate = new google.maps.InfoWindow({
 	  					content: infowindow_html 
@@ -591,8 +592,10 @@ $(document).ready(function(){
 						//var infowindow_animate = new google.maps.InfoWindow({
 	  					//	content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
 						//});
-						infowindow_animate.open(map_animate,marker_animate);
+						infowindow_animate.open(map_animate,marker_animate);									
 						
+						// zoom in after clicking the marker
+						map_animate.setZoom(4);
 						
 					});
 					
@@ -914,7 +917,7 @@ The first genre map is an Obamicon map. Obamicons are this. Structured in the st
      		<div id="flickr_count"></div>
      		<div id="num_plotted_images"></div>
   			<div id="map-and-checkboxes-container">
-  				<div id="genre-map" ></div>
+  				<div id="genre-map"  style="width:800px;height:600px;" ></div>
   			   	<div id="genre-checkboxes"> <button id='show_hide_button' onclick="hide_all()">Hide All</button></div>
   			</div>   	
 			<br>

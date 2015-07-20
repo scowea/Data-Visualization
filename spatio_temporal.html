@@ -103,8 +103,9 @@ var lat_lng_counter = 0;
 $(document).ready(function(){
     
 	var myLatlng = new google.maps.LatLng(27.793756, -96.149808);//(38.89808,-77.036523);
-	var mapOptions = { zoom: 2, center: myLatlng, mapTypeId: google.maps.MapTypeId.SATELLITE };// satillite view
+	var mapOptions = { zoom: 2, center: myLatlng, mapTypeId: google.maps.MapTypeId.SATELLITE, minZoom: 2 };// satillite view
 	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);    
+	
 	
 	 		
     // get the data from flickr
@@ -123,7 +124,10 @@ $(document).ready(function(){
 	    
 		//.............................................................
 		// zero out the day/year/month counters
-		for (this_year = 2006; this_year <= 2014; this_year++)
+		
+		current_year = new Date().getFullYear();
+		
+		for (this_year = 2006; this_year <= current_year; this_year++)
 		{
 			count_per_year_arr[this_year] = 0;
 				    	
@@ -140,7 +144,7 @@ $(document).ready(function(){
 					} // end for(this_day = 1; this_day <= 12; this_day++)   						   		
 				} // end if ((this_year == 2009) && (this_month == 1))				   						   		
 			} // end for(this_month = 1; this_month <= 12; this_month++)
-		} // end for (this_year = 2006; this_year <= 2014; this_year++)   
+		} // end for (this_year = 2006; this_year <= currentYear; this_year++)   
     	
 
  	     
@@ -273,6 +277,9 @@ $(document).ready(function(){
 	  						prev_infowindow = infowindow;
 	  						
 	    					infowindow.open(map,marker);
+	    					
+	    					// zoom in after clicking the marker
+							map.setZoom(3);
 	  					});
 	  					
 	  					
@@ -426,13 +433,7 @@ function changeRadius() {
 	
 			<p>This set of maps indicates the places to which Obama Hope has circulated both within and beyond the U.S. border. Like other geographic information, these maps consists of two components: a spatial component, such as a city, street, or business name, and a thematic component, which assigns some attribute to that location (Lancaster). Yet Maps 2 and 3 also incorporate a temporal dimension in order to gain a sense of how Obama Hope circulated spatially in time as well as the rate of its uptake across the world. By finding correlations between space, time, and thematic information then, we are able to disover...</p>
 		
-		
-			<p> To get idea of how the obama hope image circulated, although this story can’t be told, I entered in chronological dates where image showed up on heat map. Viewers can click on “Play/Pause” and see how it moved.</p>
-<iframe width='100%' height='520' frameborder='0' src='http://scott-the-weaver.cartodb.com/viz/c7487258-4766-11e4-a794-0e853d047bba/embed_map' allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
-	
-			<hr />
-       		
-			<p>The second is a heat map, showing where and when the image showed up across the world.  You can zoom in on cities such as Log Angeles where many sightings of the image were documented.</p>
+					<p>The first is a heat map, showing where and when the image showed up across the world.  You can zoom in on cities such as Log Angeles where many sightings of the image were documented.</p>
 			
 			<div id="flickr_count"></div>
 			<div id="num_plotted_images"></div><br>
@@ -441,10 +442,16 @@ function changeRadius() {
             <button onclick="changeRadius()">Change radius</button>
 
   			<div id="map-canvas" width="100%" height="500px"></div>
+			<hr />
+       		
+
   			  
+			<p> To get idea of how the obama hope image circulated, although this story can’t be told, I entered in chronological dates where image showed up on heat map. Viewers can click on “Play/Pause” and see how it moved.</p>
+<iframe width='100%' height='520' frameborder='0' src='http://scott-the-weaver.cartodb.com/viz/c7487258-4766-11e4-a794-0e853d047bba/embed_map' allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+	
        			
 			
-		
+	
 			
 					
 		

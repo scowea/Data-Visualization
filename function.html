@@ -226,7 +226,7 @@ $(document).ready(function(){
 	//..........................................................................        
     
 	var map_animateLatlng = new google.maps.LatLng(35.232471, 9.319066);//(38.89808,-77.036523);
-	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN };// satillite view
+	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN, minZoom: 2 };// satillite view
 	map_animate = new google.maps.Map(document.getElementById("genre-map"), map_animateOptions);    
 	
 	
@@ -584,6 +584,8 @@ $(document).ready(function(){
 						//});
 						infowindow_animate.open(map_animate,marker_animate);
 						
+						// zoom in after clicking the marker
+						map_animate.setZoom(4);
 						
 					});
 					
@@ -869,7 +871,7 @@ function compareSecondColumn(a, b) {
      		<div id="flickr_count"></div>
      		<div id="num_plotted_images"></div>
   			<div id="map-and-checkboxes-container">
-  				<div id="genre-map" ></div>
+  				<div id="genre-map" height="600px"></div>
   			   	<div id="genre-checkboxes"> <button id='show_hide_button' onclick="hide_all()">Hide All</button></div>
   			</div>   	
 			<br>
