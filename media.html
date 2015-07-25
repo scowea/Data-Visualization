@@ -22,6 +22,7 @@ Date: 2014-02-01
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=visualization"></script>
 		<script src="http://code.highcharts.com/highcharts.js"></script>
 		<script src="http://code.highcharts.com/modules/exporting.js"></script>
+		<script src="js/oms.min.js"></script>
 		
 <script>
 function initialize() {
@@ -230,6 +231,28 @@ $(document).ready(function(){
 	var map_animateOptions = { zoom: 2, center: map_animateLatlng, mapTypeId: google.maps.MapTypeId.TERRAIN, minZoom: 2 };// satillite view
 	map_animate = new google.maps.Map(document.getElementById("genre-map"), map_animateOptions);    
 	
+	// create a spiderfier.. so if multiple markers are on the same exact coordinate, we can still click them
+	var oms = new OverlappingMarkerSpiderfier(map_animate);  
+	
+	// add a global window
+	var iw = new google.maps.InfoWindow();
+	
+	// add a click listener on the OMS
+	oms.addListener('click', function(marker) {
+        iw.setContent(marker.desc);
+        iw.open(map_animate, marker);
+        
+        // zoom in after clicking the marker if we arent already zoomed in to at least 4
+        if (map_animate.getZoom() < 4) { 
+			map_animate.setZoom(4);
+		}
+    });
+    
+    // add a listener to the spiderfy event.. when the markers spread out 
+    oms.addListener('spiderfy', function(markers) {        
+    	// close any open info windows
+        iw.close();
+    });
 	
 	//****************************************************************************
 	// GATHER THE DATA FOR THE PIE CHART..
@@ -566,12 +589,14 @@ $(document).ready(function(){
 					infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
 					infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
 					
-						
-					var infowindow_animate = new google.maps.InfoWindow({
-	  					content: infowindow_html 
-					});
+					// dont need individual info windows anymore.. using a global one declared above	
+					//var infowindow_animate = new google.maps.InfoWindow({
+	  				//	content: infowindow_html 
+					//});
 					
-						
+					// dont add click listeners to the markers directly... we use a global listener on the 
+					// overlappingMarkerSpiderfier instance instead
+					/*	
 					google.maps.event.addListener(marker_animate, 'click', function() {
 						if (prev_infowindow_animate) { prev_infowindow_animate.close();} // close any other infowindows that happen to be open
 						prev_infowindow_animate = infowindow_animate;
@@ -586,6 +611,13 @@ $(document).ready(function(){
 						
 						
 					});
+					*/
+					
+					// save off the contents of this info window into a attribute of the marker
+					marker_animate.desc = infowindow_html;	
+					
+					// tell the overlappingMarkerSpiderfier instance about each marker as we add it
+					oms.addMarker(marker_animate);  // <-- here										
 					
 					// push this marker into a array representing the group of markers
 					gmarkers.push(marker_animate);
