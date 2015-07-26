@@ -49,9 +49,17 @@ Date: 2014-02-01
 	        tiles_loader: true
 	    })
 	    .done(function(vis, layers) {
-	      //First layer is the basemap, the second is the Torque layer
+	      //First layer is the basemap, the second is the Torque layer	      
 	      torqueLayer = layers[1];
-	      torqueLayer.stop(); // no autoplay of timelapse
+	      torqueLayer.pause(); // no autoplay of timelapse
+	      //torqueLayer.stop(); // no autoplay of timelapse
+	      //baseLayer.stop();
+	      
+	      torqueLayer.on('change:time', function(changes) {
+	          if (changes.step == 0) {
+	          		torqueLayer.pause();
+	          }
+	      });
 	    })
 	    .error(function(err) {
 	      console.log(err);
