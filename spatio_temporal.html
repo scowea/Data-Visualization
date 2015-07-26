@@ -20,6 +20,8 @@ Date: 2014-02-01
  		<script src="js/jquery.js"></script>
 				
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization"></script>
+		
+		<script src="js/oms.min.js"></script>
 
 		
 <script>
@@ -102,11 +104,32 @@ var lat_lng_counter = 0;
 //..........................................................................    
 $(document).ready(function(){
     
-	var myLatlng = new google.maps.LatLng(27.793756, -96.149808);//(38.89808,-77.036523);
+	var myLatlng = new google.maps.LatLng(35.232471, 9.319066);//(38.89808,-77.036523);
 	var mapOptions = { zoom: 2, center: myLatlng, mapTypeId: google.maps.MapTypeId.SATELLITE, minZoom: 2 };// satillite view
-	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);    
+	map = new google.maps.Map(document.getElementById('temporal-canvas'), mapOptions);    
 	
+	// create a spiderfier.. so if multiple markers are on the same exact coordinate, we can still click them
+	var oms = new OverlappingMarkerSpiderfier(map);  
 	
+	// add a global window
+	var iw = new google.maps.InfoWindow();
+	
+	// add a click listener on the OMS
+	oms.addListener('click', function(marker) {
+        iw.setContent(marker.desc);
+        iw.open(map, marker);
+        
+        // zoom in after clicking the marker if we arent already zoomed in to at least 4
+        if (map.getZoom() < 4) { 
+			map.setZoom(4);
+		}
+    });
+    
+    // add a listener to the spiderfy event.. when the markers spread out 
+    oms.addListener('spiderfy', function(markers) {        
+    	// close any open info windows
+        iw.close();
+    });
 	 		
     // get the data from flickr
     // see how many pages of photos we have...
@@ -267,11 +290,12 @@ $(document).ready(function(){
 						infowindow_html += '<b>Photographer:</b> '+this_photo.gsx$photographer.$t + '<br>';
 						infowindow_html += '<b>Source:</b> <a target=_blank href="'+this_photo.gsx$otherlinks.$t+'">'+this_photo.gsx$otherlinks.$t + '</a><br>';
 						
-						var infowindow = new google.maps.InfoWindow({
-	      					content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
-	  					});
+						
+						//var infowindow = new google.maps.InfoWindow({
+	      				//	content: infowindow_html//'<h3>'+this_photo.gsx$description.$t+'</h3><img src="'+thumbnail+'" width=200px height=200px alt="'+this_photo.gsx$description.$t+'" ><br>' 
+	  					//});
 	
-	  					
+	  					/*
 	  					google.maps.event.addListener(marker, 'click', function() {
 	  						if (prev_infowindow) { prev_infowindow.close();} // close any other infowindows that happen to be open
 	  						prev_infowindow = infowindow;
@@ -281,7 +305,13 @@ $(document).ready(function(){
 	    					// zoom in after clicking the marker
 							map.setZoom(3);
 	  					});
+	  					*/
 	  					
+	  					// save off the contents of this info window into a attribute of the marker
+						marker.desc = infowindow_html;	
+					
+						// tell the overlappingMarkerSpiderfier instance about each marker as we add it
+						oms.addMarker(marker);  // <-- here						
 	  					
 	  					lat_lng_counter++;
 	  					$("#num_plotted_images").html('Photos With Coordinates: <b>' + lat_lng_counter + '</b>');
@@ -441,7 +471,7 @@ function changeRadius() {
 			<button onclick="changeGradient()">Change gradient</button>
             <button onclick="changeRadius()">Change radius</button>
 
-  			<div id="map-canvas" width="100%" height="500px"></div>
+  			<div id="temporal-canvas" style="width: 100%; height: 500px"></div>
 			<hr />
        		
 
